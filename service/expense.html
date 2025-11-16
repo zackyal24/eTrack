@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>eTrack — Add Expense</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background:#ffffff; font-family:'Inter', sans-serif; }
+
+    /* Sidebar (left strip) - updated gradient and elevated */
+    .app-sidebar {
+      position:fixed;
+      left:0;
+      top:0;
+      height:100vh;
+      width:200px;
+  background: linear-gradient(180deg, #0056d2 0%, #003b82 100%);
+      padding:18px 14px;
+      box-sizing:border-box;
+      color: #ffffff;
+      box-shadow: 0 12px 36px rgba(3,59,130,0.12);
+      transition: transform .18s ease, box-shadow .18s ease;
+      z-index: 1040;
+      border-right: 1px solid rgba(255,255,255,0.04);
+    }
+
+    /* subtle lift on hover for pointer devices */
+    @media (hover: hover) and (pointer: fine) {
+      .app-sidebar:hover { transform: translateY(-6px); box-shadow: 0 20px 44px rgba(3,59,130,0.18); }
+    }
+
+  .app-sidebar .brand { display:flex; align-items:center; justify-content:center; margin-bottom:18px; padding-top:12px; }
+  .app-sidebar .brand img { height:56px; width:56px; object-fit:cover; border-radius:10px; box-shadow:0 8px 26px rgba(3,59,130,0.14); }
+  .app-sidebar .nav-list { margin-top:8px; display:flex; flex-direction:column; gap:12px; }
+  .app-sidebar a.nav-link { color: rgba(255,255,255,0.95); text-decoration:none; font-weight:600; padding:10px 12px; border-radius:8px; display:block; }
+  .app-sidebar a.nav-link:hover { background: rgba(255,255,255,0.06); transform: translateY(-3px); transition: all .14s ease; }
+  .app-sidebar a.nav-link.active, .app-sidebar a.nav-link.active:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .app-sidebar a.nav-link.logout { color: rgba(255,255,255,0.9); opacity:0.95; }
+  .app-sidebar { padding:22px 14px; border-top-right-radius:12px; border-bottom-right-radius:12px; }
+
+    /* push main content to the right of sidebar on wider screens */
+    @media(min-width: 768px){
+      /* top-nav hidden on desktop; content offset handled by .main padding-left helper */
+      .top-nav { display: none !important; }
+    }
+
+    /* mobile: hide sidebar by default and provide a small strip button */
+      @media(max-width: 767px) {
+      .app-sidebar { transform: translateX(-100%); transition: transform .22s ease; z-index:1055; }
+      .app-sidebar.open { transform: translateX(0); }
+      .sidebar-overlay { display:none; }
+      .sidebar-overlay.show { display:block; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1050; }
+      /* ensure main content not pushed on mobile */
+      .container-dashboard { margin-left:0; padding:12px; }
+      .form-wrap { margin-left:0; }
+    }
+
+    /* mobile small menu (anchored to navbar menu button) */
+    .mobile-menu-overlay { display:none; }
+    .mobile-menu-overlay.show { display:block; position:fixed; inset:0; background:rgba(0,0,0,0.25); z-index:1050; }
+    .mobile-menu {
+      position:fixed; top:56px; right:12px; z-index:1060;
+      background: rgba(255,255,255,0.98); backdrop-filter: blur(4px);
+      border-radius:8px; box-shadow:0 8px 20px rgba(0,0,0,0.12);
+      min-width:160px; padding:8px; display:none;
+    }
+    .mobile-menu.show { display:block; }
+    .mobile-menu a { display:block; padding:8px 10px; color:#083b73; text-decoration:none; border-radius:6px; }
+    .mobile-menu a:hover { background:rgba(3,59,130,0.06); }
+
+    .top-nav {
+      background:#003b82;
+      color:white;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .summary-bar {
+      background:#003b82;
+      color:white;
+      padding:12px 16px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .summary-item { flex:1; min-width:120px; }
+    .summary-title { font-size:13px; opacity:0.8; }
+    .summary-value { font-size:14px; font-weight:600; }
+
+    .month-box {
+      background:#002e66;
+      padding:12px 16px;
+      border-radius:6px;
+      color:white;
+      font-weight:500;
+      margin-bottom:10px;
+    }
+
+    .tx-card {
+      padding:12px;
+      border-bottom:1px solid #e6e6e6;
+    }
+
+    .tx-icon {
+      width:40px; height:40px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      background:#eef3ff; color:#003b82; font-size:20px;
+    }
+
+    .fab-btn {
+      width:55px; height:55px;
+      border-radius:50%;
+      position:fixed;
+      bottom:25px; right:25px;
+      background:#0056d2;
+      color:white;
+      font-size:30px;
+      display:flex; align-items:center; justify-content:center;
+      border:none;
+      box-shadow:0 4px 10px rgba(0,0,0,0.25);
+    }
+
+    @media(min-width:992px){
+      .container-dashboard { max-width:900px; margin:auto; }
+      .fab-btn { bottom:40px; right:40px; }
+    }
+      #fabMenu {
+        position: absolute;
+        right: 0;
+        bottom: 70px;
+        background: #ffffff;
+        padding: 8px;
+        border-radius: 10px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 150px;
+        transform-origin: bottom right;
+        transition: transform .18s ease, opacity .18s ease;
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+        z-index: 1000;
+      }
+
+      /* visible state */
+      .fab-menu-show {
+        opacity: 1 !important;
+        transform: translateY(0) scale(1) !important;
+      }
+
+      /* menu buttons inside */
+      .fab-menu-btn {
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+      }
+      /* unified summary row */
+      .summary-row {
+        background: #003b82;
+        color: white;
+        padding: 12px 14px;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0,59,130,0.12);
+      }
+
+      .summary-row .summary-item { min-width:120px; }
+      .summary-row .summary-title { font-size:12px; opacity:0.85; }
+      .summary-row .summary-value { font-size:15px; font-weight:700; }
+
+      @media (max-width: 575px) {
+        /* container padding to avoid edge-to-edge */
+        .container-dashboard { padding-left:12px; padding-right:12px; }
+
+        .summary-row { flex-direction: column; align-items:stretch; gap:10px; padding:10px; }
+        /* month row stays at top, spaced nicely */
+        .summary-row > .d-flex.align-items-center { width:100%; justify-content:space-between; }
+
+        /* stack summary items vertically for clarity */
+        .summary-row > .d-flex.gap-3 { width:100%; flex-direction:column; gap:8px; }
+        .summary-row .summary-item {
+          flex: none;
+          width: 100%;
+          max-width: 100%;
+          text-align: left;
+          background: rgba(255,255,255,0.06);
+          padding:10px 12px;
+          border-radius:8px;
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+        }
+        .summary-row .summary-title { font-size:12px; opacity:0.9; }
+        .summary-row .summary-value { font-size:16px; font-weight:700; }
+      }
+    /* make sure on small desktops the layout remains fluid and not clipped */
+      @media (min-width: 576px) and (max-width: 991px) {
+        .container-dashboard { padding-left: 18px; padding-right:18px; }
+      }
+    /* layout helpers: keep sidebar fixed, center content area inside available space */
+    .main { padding-left: 0; }
+    .content-inner { max-width: 900px; margin: 12px auto; padding: 0 12px; }
+    @media(min-width:768px){ .main { padding-left: 220px; } }
+
+    /* form specific styles */
+    .form-card {
+      background: #e9f2ff;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 8px 20px rgba(3,59,130,0.06);
+    }
+    .submit-btn {
+      background:#083b73; color:white; border-radius:8px; padding:8px 18px;
+    }
+
+  /* page header styles */
+  .page-header { margin-top: 12px; margin-bottom: 12px; }
+  .page-header h2 { font-size:1.35rem; font-weight:700; margin:0 0 6px 0; color:#08284a; }
+  .page-header .subtitle { color:#4f6174; font-size:0.95rem; }
+  </style>
+</head>
+<body>
+  <!-- Left Sidebar -->
+  <aside class="app-sidebar">
+    <div class="brand">
+      <img src="../asset/img/logo.png" alt="eTrack logo" class="brand-logo">
+    </div>
+    <nav class="nav-list">
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="#" class="nav-link">Report</a>
+      <a href="#" class="nav-link">Goals</a>
+      <a href="#" class="nav-link logout">Log out</a>
+    </nav>
+  </aside>
+  <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+  <div id="mobileMenuOverlay" class="mobile-menu-overlay" aria-hidden="true"></div>
+  <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="#">Report</a>
+    <a href="#">Goals</a>
+    <a href="#" class="logout">Log out</a>
+  </div>
+  <div class="top-nav">
+    <div class="d-flex align-items-center gap-2">
+      <img src="../asset/img/logo.png" style="height:34px;" alt="logo">
+    </div>
+    <button id="navMenuBtn" class="btn text-white"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/></svg></button>
+  </div>
+
+  <div class="main">
+    <div class="form-wrap content-inner">
+    <!-- Page header -->
+    <div class="page-header mt-3 mb-3">
+      <h2 class="h5 mb-1">Add Expense</h2>
+      <div class="subtitle">Record a new expense entry</div>
+    </div>
+    <div class="form-card">
+      <form id="expenseForm">
+        <div class="mb-3">
+          <label class="form-label small">Date</label>
+          <input type="date" class="form-control" name="date" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small">Type</label>
+          <select class="form-select" name="type">
+            <option>Cash</option>
+            <option>Card</option>
+            <option>Transfer</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small">Amount</label>
+          <input type="number" step="0.01" class="form-control" name="amount" placeholder="50.000" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small">Category</label>
+          <select class="form-select" name="category">
+            <option>Transportation</option>
+            <option>Food</option>
+            <option>Entertainment</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small">Note</label>
+          <input type="text" class="form-control" name="note" placeholder="Ojek">
+        </div>
+
+        <div class="d-flex justify-content-center mt-3">
+          <button type="submit" class="btn submit-btn">Submit</button>
+        </div>
+      </form>
+    </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('expenseForm');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('Expense saved (demo). Returning to dashboard.');
+      window.location.href = 'dashboard.html';
+    });
+
+  // Sidebar mobile toggle (triggered from navbar menu button)
+  const sidebar = document.querySelector('.app-sidebar');
+  const navMenuBtn = document.getElementById('navMenuBtn');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  function openSidebar() { sidebar.classList.add('open'); sidebarOverlay.classList.add('show'); sidebarOverlay.setAttribute('aria-hidden','false'); }
+  function closeSidebar() { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('show'); sidebarOverlay.setAttribute('aria-hidden','true'); }
+    navMenuBtn && navMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (window.innerWidth <= 767) {
+        const isOpen = mobileMenu.classList.contains('show');
+        if (isOpen) {
+          mobileMenu.classList.remove('show'); mobileMenuOverlay.classList.remove('show'); mobileMenu.setAttribute('aria-hidden','true'); mobileMenuOverlay.setAttribute('aria-hidden','true');
+        } else {
+          mobileMenu.classList.add('show'); mobileMenuOverlay.classList.add('show'); mobileMenu.setAttribute('aria-hidden','false'); mobileMenuOverlay.setAttribute('aria-hidden','false');
+        }
+        return;
+      }
+      openSidebar();
+    });
+    sidebarOverlay && sidebarOverlay.addEventListener('click', () => closeSidebar());
+    mobileMenuOverlay && mobileMenuOverlay.addEventListener('click', () => { mobileMenu.classList.remove('show'); mobileMenuOverlay.classList.remove('show'); mobileMenu.setAttribute('aria-hidden','true'); mobileMenuOverlay.setAttribute('aria-hidden','true'); });
+    document.querySelectorAll('.app-sidebar .nav-link').forEach(a => a.addEventListener('click', () => closeSidebar()));
+    document.querySelectorAll('#mobileMenu a').forEach(a => a.addEventListener('click', () => { mobileMenu.classList.remove('show'); mobileMenuOverlay.classList.remove('show'); mobileMenu.setAttribute('aria-hidden','true'); mobileMenuOverlay.setAttribute('aria-hidden','true'); }));
+  </script>
+</body>
+</html>

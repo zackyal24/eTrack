@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Report — eTrack</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      body { background:#ffffff; font-family:'Inter', sans-serif; }
+
+      /* Sidebar (left strip) - updated gradient and elevated */
+      .app-sidebar {
+        position:fixed;
+        left:0;
+        top:0;
+        height:100vh;
+        width:200px;
+    background: linear-gradient(180deg, #0056d2 0%, #003b82 100%);
+        padding:18px 14px;
+        box-sizing:border-box;
+        color: #ffffff;
+        box-shadow: 0 12px 36px rgba(3,59,130,0.12);
+        transition: transform .18s ease, box-shadow .18s ease;
+        z-index: 1040;
+        border-right: 1px solid rgba(255,255,255,0.04);
+      }
+
+      /* subtle lift on hover for pointer devices */
+      @media (hover: hover) and (pointer: fine) {
+        .app-sidebar:hover { transform: translateY(-6px); box-shadow: 0 20px 44px rgba(3,59,130,0.18); }
+      }
+
+    .app-sidebar .brand { display:flex; align-items:center; justify-content:center; margin-bottom:18px; padding-top:12px; }
+    .app-sidebar .brand img { height:56px; width:56px; object-fit:cover; border-radius:10px; box-shadow:0 8px 26px rgba(3,59,130,0.14); }
+    .app-sidebar .nav-list { margin-top:8px; display:flex; flex-direction:column; gap:12px; }
+    .app-sidebar a.nav-link { color: rgba(255,255,255,0.95); text-decoration:none; font-weight:600; padding:10px 12px; border-radius:8px; display:block; }
+    .app-sidebar a.nav-link:hover { background: rgba(255,255,255,0.06); transform: translateY(-3px); transition: all .14s ease; }
+    .app-sidebar a.nav-link.active, .app-sidebar a.nav-link.active:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .app-sidebar a.nav-link.logout { color: rgba(255,255,255,0.9); opacity:0.95; }
+    .app-sidebar { padding:22px 14px; border-top-right-radius:12px; border-bottom-right-radius:12px; }
+
+      /* mobile: hide sidebar by default and provide a small strip button */
+      @media(max-width: 767px) {
+        .app-sidebar { transform: translateX(-100%); transition: transform .22s ease; z-index:1055; }
+        .app-sidebar.open { transform: translateX(0); }
+        .sidebar-overlay { display:none; }
+        .sidebar-overlay.show { display:block; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1050; }
+      }
+
+      /* mobile small menu (anchored to navbar menu button) */
+      .mobile-menu-overlay { display:none; }
+      .mobile-menu-overlay.show { display:block; position:fixed; inset:0; background:rgba(0,0,0,0.25); z-index:1050; }
+      .mobile-menu {
+        position:fixed; top:56px; right:12px; z-index:1060;
+        background: rgba(255,255,255,0.98); backdrop-filter: blur(4px);
+        border-radius:8px; box-shadow:0 8px 20px rgba(0,0,0,0.12);
+        min-width:160px; padding:8px; display:none;
+      }
+      .mobile-menu.show { display:block; }
+      .mobile-menu a { display:block; padding:8px 10px; color:#083b73; text-decoration:none; border-radius:6px; }
+      .mobile-menu a:hover { background:rgba(3,59,130,0.06); }
+
+      /* top-nav: shown on mobile, hidden on desktop (dashboard behavior) */
+      .top-nav {
+        background:#003b82;
+        color:white;
+        padding:14px 16px;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+      }
+
+      @media(min-width: 768px){
+        /* hide mobile top-nav on desktop to match dashboard */
+        .top-nav { display: none !important; }
+      }
+
+      /* shared report styles */
+      :root{--sidebar-width:220px;}
+  .main-content{margin-left:var(--sidebar-width);padding:64px 1rem 1.5rem;}
+      .report-controls{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap}
+      .report-tabs{display:inline-flex;background:#f6f8fa;border-radius:999px;padding:4px}
+      .report-tab{padding:.45rem .8rem;border-radius:999px;cursor:pointer;color:#495057}
+      .report-tab.active{background:#fff;box-shadow:0 4px 14px rgba(3,12,39,0.08);}
+      .report-card{background:#fff;border-radius:.75rem;padding:1rem;box-shadow:0 6px 18px rgba(3,12,39,0.06);}
+      .donut-card{box-shadow:0 8px 26px rgba(3,12,39,0.06);}
+      .donut-card canvas{display:block;margin:0 auto}
+      .total-pill{border-radius:999px;padding:.35rem .8rem;font-weight:600}
+      #incomeLegend li, #expenseLegend li{padding:.35rem 0}
+      .amount-row{display:flex;gap:1rem;align-items:baseline}
+      .amount-row .amount{font-size:1.5rem;font-weight:700}
+      .small-muted{color:#6c757d;font-size:.9rem}
+
+      @media (max-width:767px){
+        .app-sidebar{transform:translateX(-100%);transition:transform .25s ease;}
+        .app-sidebar.open{transform:translateX(0)}
+        .top-nav{left:0}
+        .main-content{margin-left:0;padding-top:76px}
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="app-sidebar" id="sidebar">
+      <div class="brand">
+        <img src="../asset/img/logo.png" alt="eTrack logo" class="brand-logo" style="height:56px;width:56px;object-fit:cover;border-radius:10px;box-shadow:0 8px 26px rgba(3,59,130,0.14)">
+      </div>
+      <nav class="nav-list">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="report.html" class="nav-link active">Report</a>
+        <a href="goals.html" class="nav-link">Goals</a>
+        <a href="#" class="nav-link logout">Log out</a>
+      </nav>
+    </aside>
+
+    <!-- mobile overlay (opened by navbar menu button) -->
+    <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+    <!-- mobile small menu + overlay (used on small screens) -->
+    <div id="mobileMenuOverlay" class="mobile-menu-overlay" aria-hidden="true"></div>
+    <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="report.html">Report</a>
+      <a href="goals.html">Goals</a>
+      <a href="#" class="logout">Log out</a>
+    </div>
+
+    <!-- Top Navigation (mobile) - match dashboard markup -->
+    <div class="top-nav">
+      <div class="d-flex align-items-center gap-2">
+        <img src="../asset/img/logo.png" style="height:34px;" alt="eTrack">
+      </div>
+      <button id="navMenuBtn" class="btn text-white" aria-label="Open menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/></svg></button>
+    </div>
+
+    <main class="main-content container">
+      <div class="page-header d-flex align-items-center justify-content-between mt-3 mb-2">
+        <div>
+          <h1 class="h4 mb-0">Reports</h1>
+          <div class="text-muted small">Overview of income and expenses</div>
+        </div>
+      </div>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="report-controls">
+          <div class="report-tabs" role="tablist" aria-label="Report tabs">
+            <div class="report-tab active" data-target="incomeSection" role="tab">Income</div>
+            <div class="report-tab" data-target="expenseSection" role="tab">Expenses</div>
+          </div>
+          <div class="small-muted">Summary</div>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary btn-sm">Export</button>
+          <button class="btn btn-primary btn-sm">Customize</button>
+        </div>
+      </div>
+
+      <section id="incomeSection" class="mb-3">
+        <div class="report-card mb-3">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="small-muted">Total income</div>
+              <div class="amount-row">
+                <div class="amount">Rp 12.450.000</div>
+                <div class="small-muted">+12% from last month</div>
+              </div>
+            </div>
+            <div class="text-end small-muted">Nov 2025</div>
+          </div>
+          <hr/>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="p-3 bg-light rounded donut-card">
+                <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+                  <div style="flex:0 0 160px;max-width:160px">
+                    <canvas id="incomeDonut" width="160" height="160"></canvas>
+                  </div>
+                  <div style="flex:1;min-width:140px">
+                    <ul id="incomeLegend" class="list-unstyled mb-0"></ul>
+                  </div>
+                </div>
+                <div style="display:flex;justify-content:center;margin-top:.75rem">
+                  <button class="btn btn-outline-primary btn-sm total-pill">Total&nbsp;&nbsp;Rp15.000.000</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <ul class="list-unstyled mb-0">
+                <li class="d-flex justify-content-between py-2 border-bottom"><div>Salary</div><div>Rp 9.000.000</div></li>
+                <li class="d-flex justify-content-between py-2 border-bottom"><div>Freelance</div><div>Rp 2.200.000</div></li>
+                <li class="d-flex justify-content-between py-2"><div>Other</div><div>Rp 1.250.000</div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="report-card">
+          <h6 class="mb-3">Recent Income</h6>
+          <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between align-items-center">Salary <span class="badge bg-success">Rp 9.000.000</span></li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">Freelance <span class="badge bg-success">Rp 2.200.000</span></li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">Gift <span class="badge bg-success">Rp 1.250.000</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="expenseSection" class="d-none">
+        <div class="report-card mb-3">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="small-muted">Total expenses</div>
+              <div class="amount-row">
+                <div class="amount">Rp 8.230.000</div>
+                <div class="small-muted">-5% from last month</div>
+              </div>
+            </div>
+            <div class="text-end small-muted">Nov 2025</div>
+          </div>
+          <hr/>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="p-3 bg-light rounded donut-card">
+                <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+                  <div style="flex:0 0 160px;max-width:160px">
+                    <canvas id="expenseDonut" width="160" height="160"></canvas>
+                  </div>
+                  <div style="flex:1;min-width:140px">
+                    <ul id="expenseLegend" class="list-unstyled mb-0"></ul>
+                  </div>
+                </div>
+                <div style="display:flex;justify-content:center;margin-top:.75rem">
+                  <button class="btn btn-outline-primary btn-sm total-pill">Total&nbsp;&nbsp;Rp15.000.000</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <ul class="list-unstyled mb-0">
+                <li class="d-flex justify-content-between py-2 border-bottom"><div>Rent</div><div>Rp 3.000.000</div></li>
+                <li class="d-flex justify-content-between py-2 border-bottom"><div>Food</div><div>Rp 2.400.000</div></li>
+                <li class="d-flex justify-content-between py-2"><div>Transport</div><div>Rp 830.000</div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="report-card">
+          <h6 class="mb-3">Recent Expenses</h6>
+          <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between align-items-center">Rent <span class="badge bg-danger">Rp 3.000.000</span></li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">Groceries <span class="badge bg-danger">Rp 1.200.000</span></li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">Transport <span class="badge bg-danger">Rp 830.000</span></li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+  <!-- duplicate overlay removed (sidebar overlay placed near the aside) -->
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+      // Mobile menu & sidebar toggles (match dashboard behavior)
+      const navMenuBtn = document.getElementById('navMenuBtn');
+      const sidebar = document.getElementById('sidebar');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+
+      navMenuBtn && navMenuBtn.addEventListener('click', ()=>{
+        // on small screens, open the small mobile menu (dashboard pattern)
+        if(window.innerWidth < 768){
+          mobileMenu && mobileMenu.classList.toggle('show');
+          mobileMenuOverlay && mobileMenuOverlay.classList.toggle('show');
+        } else {
+          // fallback: toggle sidebar open (useful for testing)
+          sidebar && sidebar.classList.toggle('open');
+          if(sidebarOverlay) sidebarOverlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+        }
+      });
+
+      // close overlays when clicking outside
+      mobileMenuOverlay && mobileMenuOverlay.addEventListener('click', ()=>{ mobileMenu && mobileMenu.classList.remove('show'); mobileMenuOverlay.classList.remove('show'); });
+      sidebarOverlay && sidebarOverlay.addEventListener('click', ()=>{ sidebar && sidebar.classList.remove('open'); sidebarOverlay.style.display='none'; });
+
+      // close mobile menu when clicking a link
+      if(mobileMenu){
+        mobileMenu.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=>{ mobileMenu.classList.remove('show'); mobileMenuOverlay.classList.remove('show'); }));
+      }
+
+      // Report tabs
+      document.querySelectorAll('.report-tab').forEach(tab=>{
+        tab.addEventListener('click', ()=>{
+          document.querySelectorAll('.report-tab').forEach(t=>t.classList.remove('active'));
+          tab.classList.add('active');
+          const target = tab.getAttribute('data-target');
+          document.querySelectorAll('main section').forEach(s=>s.classList.add('d-none'));
+          const el = document.getElementById(target);
+          el && el.classList.remove('d-none');
+        });
+      });
+
+      // Small helper to build a legend list
+      function buildLegend(containerId, labels, colors, values){
+        const ul = document.getElementById(containerId);
+        if(!ul) return;
+        ul.innerHTML = '';
+        labels.forEach((lbl,i)=>{
+          const pct = values[i] ? Math.round((values[i]/values.reduce((a,b)=>a+b,0))*100) : 0;
+          const li = document.createElement('li');
+          li.style.display = 'flex'; li.style.justifyContent = 'space-between'; li.style.alignItems='center'; li.style.padding='6px 0';
+          li.innerHTML = `<div style=\"display:flex;align-items:center;gap:.6rem\"><span style=\"width:12px;height:12px;border-radius:50%;background:${colors[i]};display:inline-block\"></span><span>${lbl}</span></div><div style=\"color:#6c757d\">${pct}%</div>`;
+          ul.appendChild(li);
+        });
+      }
+
+      // Income donut
+      (function(){
+        const ctx = document.getElementById('incomeDonut').getContext('2d');
+        const labels = ['Salary','Freelance','Other','Investments'];
+        const values = [9000000,2200000,1250000,0];
+        const colors = ['#0d6efd','#198754','#0dcaf0','#6f42c1'];
+        buildLegend('incomeLegend', labels, colors, values);
+        new Chart(ctx,{
+          type:'doughnut',
+          data:{labels, datasets:[{data: values, backgroundColor: colors, hoverOffset:6}]},
+          options:{
+            cutout:'70%',
+            plugins:{legend:{display:false}},
+            responsive:true,maintainAspectRatio:true
+          }
+        });
+      })();
+
+      // Expense donut
+      (function(){
+        const ctx = document.getElementById('expenseDonut').getContext('2d');
+        const labels = ['Rent','Food','Transport','Other'];
+        const values = [3000000,2400000,830000,1070000];
+        const colors = ['#0d6efd','#ffc107','#198754','#6c757d'];
+        buildLegend('expenseLegend', labels, colors, values);
+        new Chart(ctx,{
+          type:'doughnut',
+          data:{labels, datasets:[{data: values, backgroundColor: colors, hoverOffset:6}]},
+          options:{
+            cutout:'70%',
+            plugins:{legend:{display:false}},
+            responsive:true,maintainAspectRatio:true
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
