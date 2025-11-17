@@ -53,9 +53,29 @@ router.post('/', async (req, res) => {
       INSERT INTO transactions (user_id, category_id, amount, type, occurred_at, description, payment_type)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
-    const [result] = await pool.query(insertSql, [userId, categoryId, amount, type, occurred_at, description, payment_type]);
 
-    res.status(201).json({ id: result.insertId, success: true });
+    try {
+      const [result] = await pool.query(insertSql, [userId, categoryId, amount, type, occurred_at, description, payment_type]);
+      return res.status(201).json({ id: result.insertId, success: true });
+    } catch (insErr) {
+      // If the schema doesn't have payment_type we may get ER_BAD_FIELD_ERROR (1054).
+      // Retry without the payment_type column for compatibility with older schemas.
+      if (insErr && insErr.code === 'ER_BAD_FIELD_ERROR') {
+        try {
+          const altSql = `
+            INSERT INTO transactions (user_id, category_id, amount, type, occurred_at, description)
+            VALUES (?, ?, ?, ?, ?, ?)
+          `;
+          const [result2] = await pool.query(altSql, [userId, categoryId, amount, type, occurred_at, description]);
+          return res.status(201).json({ id: result2.insertId, success: true, note: 'insert-without-payment_type' });
+        } catch (altErr) {
+          console.error('transactions POST retry error', altErr);
+          return res.status(500).json({ error: 'Internal server error' });
+        }
+      }
+      console.error('transactions POST insert error', insErr);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
   } catch (err) {
     console.error('transactions POST error', err);
     res.status(500).json({ error: 'Internal server error' });
