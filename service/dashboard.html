@@ -302,59 +302,23 @@
       <div class="d-flex gap-3 align-items-center">
         <div class="summary-item text-end">
           <div class="summary-title">Income</div>
-          <div class="summary-value">Rp 15.000.000</div>
+          <div id="incomeValue" class="summary-value">Rp 0</div>
         </div>
 
         <div class="summary-item text-end">
           <div class="summary-title">Expenses</div>
-          <div class="summary-value">Rp 5.000.000</div>
+          <div id="expensesValue" class="summary-value">Rp 0</div>
         </div>
 
         <div class="summary-item text-end">
           <div class="summary-title">Balance</div>
-          <div class="summary-value">Rp 10.000.000</div>
+          <div id="balanceValue" class="summary-value">Rp 0</div>
         </div>
       </div>
     </div>
 
-    <!-- Date Group -->
-    <div class="px-3 mt-3 small text-muted">Wed, 05 March 2025</div>
-
-    <!-- Transactions -->
-    <div class="tx-card d-flex align-items-center gap-3">
-      <div class="tx-icon">🚗</div>
-      <div class="flex-grow-1">
-        <div class="fw-bold">Transportation</div>
-      </div>
-      <div class="text-danger fw-semibold">- Rp200.000</div>
-    </div>
-
-    <div class="tx-card d-flex align-items-center gap-3">
-      <div class="tx-icon">🎬</div>
-      <div class="flex-grow-1">
-        <div class="fw-bold">Entertainment</div>
-      </div>
-      <div class="text-danger fw-semibold">- Rp270.000</div>
-    </div>
-
-    <div class="tx-card d-flex align-items-center gap-3">
-      <div class="tx-icon">🍔</div>
-      <div class="flex-grow-1">
-        <div class="fw-bold">Food</div>
-      </div>
-      <div class="text-danger fw-semibold">- Rp510.000</div>
-    </div>
-
-    <!-- Second Date -->
-    <div class="px-3 mt-3 small text-muted">Tue, 04 March 2025</div>
-
-    <div class="tx-card d-flex align-items-center gap-3">
-      <div class="tx-icon">💼</div>
-      <div class="flex-grow-1">
-        <div class="fw-bold">Salary</div>
-      </div>
-      <div class="text-success fw-semibold">+ Rp2.700.000</div>
-    </div>
+    <!-- Transactions (populated from backend) -->
+    <div id="transactionsList" class="mt-2"></div>
 
     </div>
   </div>
@@ -488,6 +452,73 @@
     document.querySelectorAll('.app-sidebar .nav-link').forEach(a => {
       a.addEventListener('click', () => closeSidebar());
     });
+  </script>
+  <script>
+    // Fetch recent transactions and monthly summary from backend and render
+    (async function(){
+      const API_BASE = 'http://localhost:3000';
+      const userId = Number(localStorage.getItem('etrack_user_id') || 1);
+
+      function formatCurrency(v){
+        try{ return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(v); }catch(e){ return 'Rp '+v; }
+      }
+
+      // compute month start/end
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const start = new Date(year, month, 1).toISOString().slice(0,10);
+      const end = new Date(year, month+1, 0).toISOString().slice(0,10);
+
+      // get summary for current month
+      try{
+        const sres = await fetch(`${API_BASE}/reports/summary?start=${start}&end=${end}&user_id=${userId}`);
+        if(sres.ok){
+          const sjson = await sres.json();
+          let income = 0, expense = 0;
+          sjson.forEach(r => {
+            if(r.type === 'income') income += Number(r.total || 0);
+            if(r.type === 'expense') expense += Number(r.total || 0);
+          });
+          const balance = income - expense;
+          const incEl = document.getElementById('incomeValue'); if(incEl) incEl.textContent = formatCurrency(income);
+          const expEl = document.getElementById('expensesValue'); if(expEl) expEl.textContent = formatCurrency(expense);
+          const balEl = document.getElementById('balanceValue'); if(balEl) balEl.textContent = formatCurrency(balance);
+        }
+      }catch(err){ console.error('summary fetch error', err); }
+
+      // fetch recent transactions
+      try{
+        const tres = await fetch(`${API_BASE}/transactions?user_id=${userId}&limit=50`);
+        if(!tres.ok) throw new Error('fail');
+        const tx = await tres.json();
+        const list = document.getElementById('transactionsList');
+        if(!list) return;
+        list.innerHTML = '';
+
+        // group by date (YYYY-MM-DD)
+        let lastDate = null;
+        tx.forEach(t => {
+          const d = t.occurred_at ? t.occurred_at.split('T')[0] : '';
+          if(d !== lastDate){
+            const dateHeader = document.createElement('div');
+            dateHeader.className = 'px-3 mt-3 small text-muted';
+            const dateObj = new Date(d + 'T00:00:00');
+            dateHeader.textContent = isNaN(dateObj.getTime()) ? d : dateObj.toLocaleDateString('id-ID', { weekday:'short', day:'2-digit', month:'long', year:'numeric' });
+            list.appendChild(dateHeader);
+            lastDate = d;
+          }
+
+          const card = document.createElement('div');
+          card.className = 'tx-card d-flex align-items-center gap-3';
+          const icon = document.createElement('div'); icon.className = 'tx-icon'; icon.textContent = '💸';
+          const title = document.createElement('div'); title.className = 'flex-grow-1'; title.innerHTML = `<div class="fw-bold">${t.category || 'Uncategorized'}</div><div class="small text-muted">${t.description || ''}</div>`;
+          const amt = document.createElement('div'); amt.className = (t.type === 'income') ? 'text-success fw-semibold' : 'text-danger fw-semibold'; amt.textContent = (t.type === 'income' ? '+ ' : '- ') + formatCurrency(Number(t.amount || 0));
+          card.appendChild(icon); card.appendChild(title); card.appendChild(amt);
+          list.appendChild(card);
+        });
+      }catch(err){ console.error('transactions fetch error', err); }
+    })();
   </script>
 </body>
 </html>
