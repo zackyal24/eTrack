@@ -59,20 +59,20 @@
     <div class="login-card">
 
       <!-- Logo -->
-      <img src="logo.png" alt="eTrack Logo" style="width:130px;" class="mb-3">
+      <img src="asset/img/logo.png" alt="eTrack Logo" style="width:130px;" class="mb-3">
 
       <h5 class="mb-4">Hai, Selamat datang!</h5>
 
       <!-- Input fields -->
-      <input type="email" placeholder="Email" class="form-control login-input mb-3">
-      <input type="password" placeholder="Password" class="form-control login-input mb-2">
+      <input id="loginEmail" type="email" placeholder="Email" class="form-control login-input mb-3">
+      <input id="loginPassword" type="password" placeholder="Password" class="form-control login-input mb-2">
 
       <div class="text-end mb-3 small">
         <a href="#" class="text-primary">lupa kata sandi?</a>
       </div>
 
       <!-- Login button -->
-      <button class="btn btn-primary w-100 login-btn mb-3">Masuk</button>
+      <button id="loginBtn" class="btn btn-primary w-100 login-btn mb-3">Masuk</button>
 
       <!-- Divider -->
       <div class="d-flex align-items-center my-3">
@@ -88,11 +88,38 @@
 
       <!-- Register link -->
       <div class="small mt-3">
-        Belum punya akun? <a href="#" class="text-primary">Daftar.</a>
+        Belum punya akun? <a href="service/register.html" class="text-primary">Daftar.</a>
       </div>
 
     </div>
   </div>
+
+    <script>
+      const API_BASE = 'http://localhost:3000';
+      const loginBtn = document.getElementById('loginBtn');
+      loginBtn && loginBtn.addEventListener('click', async (ev) => {
+        ev.preventDefault();
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        if(!email || !password){ alert('Masukkan email dan password'); return; }
+        try{
+          const res = await fetch(API_BASE + '/auth/login', {
+            method: 'POST', headers: { 'Content-Type':'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+          if(!res.ok){ const j = await res.json().catch(()=>({})); throw new Error(j.error || 'login failed'); }
+          const user = await res.json();
+          // store minimal session
+          localStorage.setItem('etrack_user_id', String(user.id));
+          localStorage.setItem('etrack_user_email', user.email || '');
+          if(user.name) localStorage.setItem('etrack_user_name', user.name);
+          window.location.href = 'service/dashboard.html';
+        }catch(err){
+          console.error('login error', err);
+          alert('Login gagal: ' + (err.message || 'error'));
+        }
+      });
+    </script>
 
 </body>
 </html>

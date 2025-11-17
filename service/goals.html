@@ -16,7 +16,7 @@
       box-shadow:0 12px 36px rgba(3,59,130,0.12); z-index:1040; border-right:1px solid rgba(255,255,255,0.04);
       border-top-right-radius:12px; border-bottom-right-radius:12px;
     }
-    .app-sidebar .brand { display:flex; align-items:center; justify-content:center; margin-bottom:18px; padding-top:12px; }
+    .app-sidebar .brand { display:flex; flex-direction:column; align-items:center; justify-content:center; margin-bottom:18px; padding-top:12px; gap:8px; }
     .app-sidebar .brand img { height:56px; width:56px; object-fit:cover; border-radius:10px; box-shadow:0 8px 26px rgba(3,59,130,0.14); }
     .app-sidebar .nav-list { margin-top:8px; display:flex; flex-direction:column; gap:12px; }
     .app-sidebar a.nav-link { color: rgba(255,255,255,0.95); text-decoration:none; font-weight:600; padding:10px 12px; border-radius:8px; display:block; }
@@ -68,9 +68,10 @@
     .content-inner { max-width:900px; margin:12px auto; padding:0 12px; }
     @media(min-width:768px){ .main { padding-left:220px; } }
 
-    /* page header */
-    .page-header { margin-top:10px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    /* page header: title on top, actions below (right-aligned) */
+    .page-header { margin-top:10px; margin-bottom:14px; display:flex; flex-direction:column; gap:8px; align-items:flex-start; }
     .page-header h2 { margin:0; font-size:1.15rem; }
+    .page-header .header-actions { width:100%; display:flex; justify-content:flex-end; }
 
     /* goals list */
     .goals-wrap { display:flex; flex-direction:column; gap:14px; }
@@ -125,12 +126,15 @@
   <aside class="app-sidebar">
     <div class="brand">
       <img src="../asset/img/logo.png" alt="eTrack logo" class="brand-logo">
+      <div id="sidebarUser" style="text-align:center;margin-top:4px;">
+        <div id="sidebarUserName" style="font-weight:700;font-size:14px;line-height:1;">User</div>
+      </div>
     </div>
     <nav class="nav-list">
       <a href="dashboard.html" class="nav-link">Dashboard</a>
-      <a href="#" class="nav-link">Report</a>
+      <a href="report.html" class="nav-link">Report</a>
       <a href="goals.html" class="nav-link active">Goals</a>
-      <a href="#" class="nav-link logout">Log out</a>
+      <a href="../index.html" class="nav-link logout">Log out</a>
     </nav>
   </aside>
 
@@ -138,26 +142,34 @@
   <div id="mobileMenuOverlay" class="mobile-menu-overlay" aria-hidden="true"></div>
   <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
     <a href="dashboard.html">Dashboard</a>
-    <a href="#">Report</a>
+    <a href="report.html">Report</a>
     <a href="goals.html">Goals</a>
-    <a href="#" class="logout">Log out</a>
+    <a href="../index.html" class="logout">Log out</a>
   </div>
 
   <div class="top-nav">
     <div class="d-flex align-items-center gap-2">
       <img src="../asset/img/logo.png" style="height:34px;" alt="logo">
+      <span id="mobileUserName" class="mobile-username">User</span>
     </div>
     <button id="navMenuBtn" class="btn text-white">☰</button>
   </div>
 
   <div class="main">
     <div class="content-inner">
+      <script>
+        (function(){
+          const name = localStorage.getItem('etrack_user_name') || 'User';
+          const elName = document.getElementById('sidebarUserName'); if(elName) elName.textContent = name;
+          const mobileEl = document.getElementById('mobileUserName'); if(mobileEl) mobileEl.textContent = name;
+        })();
+      </script>
       <div class="page-header">
         <div>
           <h2>Goals</h2>
           <div class="text-muted small">Track savings goals and contribute</div>
         </div>
-        <div class="d-flex align-items-center gap-2">
+        <div class="header-actions">
           <button id="addGoalBtn" class="add-goal-btn">+ add goal</button>
         </div>
       </div>

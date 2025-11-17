@@ -30,7 +30,7 @@
       .app-sidebar:hover { transform: translateY(-6px); box-shadow: 0 20px 44px rgba(3,59,130,0.18); }
     }
 
-  .app-sidebar .brand { display:flex; align-items:center; justify-content:center; margin-bottom:18px; padding-top:12px; }
+  .app-sidebar .brand { display:flex; flex-direction:column; align-items:center; justify-content:center; margin-bottom:18px; padding-top:12px; gap:8px; }
   .app-sidebar .brand img { height:56px; width:56px; object-fit:cover; border-radius:10px; box-shadow:0 8px 26px rgba(3,59,130,0.14); }
   .app-sidebar .nav-list { margin-top:8px; display:flex; flex-direction:column; gap:12px; }
   .app-sidebar a.nav-link { color: rgba(255,255,255,0.95); text-decoration:none; font-weight:600; padding:10px 12px; border-radius:8px; display:block; }
@@ -77,6 +77,8 @@
       align-items:center;
       justify-content:space-between;
     }
+
+    .top-nav .mobile-username { color: #fff; font-weight:700; margin-left:8px; font-size:14px; }
 
     .summary-bar {
       background:#003b82;
@@ -234,14 +236,17 @@
 
   <!-- Left Sidebar -->
   <aside class="app-sidebar">
-    <div class="brand">
-      <img src="../asset/img/logo.png" alt="eTrack logo" class="brand-logo">
-    </div>
+      <div class="brand">
+        <img src="../asset/img/logo.png" alt="eTrack logo" class="brand-logo">
+        <div id="sidebarUser" style="text-align:center;margin-top:4px;">
+          <div id="sidebarUserName" style="font-weight:700;font-size:14px;line-height:1;">User</div>
+        </div>
+      </div>
     <nav class="nav-list">
       <a href="dashboard.html" class="nav-link">Dashboard</a>
-      <a href="#" class="nav-link">Report</a>
-      <a href="#" class="nav-link">Goals</a>
-      <a href="#" class="nav-link logout">Log out</a>
+      <a href="report.html" class="nav-link">Report</a>
+      <a href="goals.html" class="nav-link">Goals</a>
+      <a href="../index.html" class="nav-link logout">Log out</a>
     </nav>
   </aside>
 
@@ -260,12 +265,24 @@
   <div class="top-nav">
     <div class="d-flex align-items-center gap-2">
       <img src="../asset/img/logo.png" style="height:34px;">
+      <span id="mobileUserName" class="mobile-username">User</span>
     </div>
     <button id="navMenuBtn" class="btn text-white"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/></svg></button>
   </div>
 
     <div class="main">
     <div class="container-dashboard content-inner">
+
+  <script>
+    // populate sidebar user name from localStorage
+    (function(){
+      const name = localStorage.getItem('etrack_user_name') || 'User';
+      const elName = document.getElementById('sidebarUserName');
+      if(elName) elName.textContent = name;
+      const mobileEl = document.getElementById('mobileUserName');
+      if(mobileEl) mobileEl.textContent = name;
+    })();
+  </script>
 
     <!-- Page header -->
     <div class="page-header d-flex align-items-center justify-content-between mt-3 mb-2">

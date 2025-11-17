@@ -30,7 +30,7 @@
         .app-sidebar:hover { transform: translateY(-6px); box-shadow: 0 20px 44px rgba(3,59,130,0.18); }
       }
 
-    .app-sidebar .brand { display:flex; align-items:center; justify-content:center; margin-bottom:18px; padding-top:12px; }
+    .app-sidebar .brand { display:flex; flex-direction:column; align-items:center; justify-content:center; margin-bottom:18px; padding-top:12px; gap:8px; }
     .app-sidebar .brand img { height:56px; width:56px; object-fit:cover; border-radius:10px; box-shadow:0 8px 26px rgba(3,59,130,0.14); }
     .app-sidebar .nav-list { margin-top:8px; display:flex; flex-direction:column; gap:12px; }
     .app-sidebar a.nav-link { color: rgba(255,255,255,0.95); text-decoration:none; font-weight:600; padding:10px 12px; border-radius:8px; display:block; }
@@ -103,6 +103,9 @@
     <aside class="app-sidebar" id="sidebar">
       <div class="brand">
         <img src="../asset/img/logo.png" alt="eTrack logo" class="brand-logo" style="height:56px;width:56px;object-fit:cover;border-radius:10px;box-shadow:0 8px 26px rgba(3,59,130,0.14)">
+        <div id="sidebarUser" style="text-align:center;margin-top:4px;">
+          <div id="sidebarUserName" style="font-weight:700;font-size:14px;line-height:1;">User</div>
+        </div>
       </div>
       <nav class="nav-list">
         <a href="dashboard.html" class="nav-link">Dashboard</a>
@@ -120,13 +123,14 @@
       <a href="dashboard.html">Dashboard</a>
       <a href="report.html">Report</a>
       <a href="goals.html">Goals</a>
-      <a href="#" class="logout">Log out</a>
+      <a href="../index.html" class="logout">Log out</a>
     </div>
 
     <!-- Top Navigation (mobile) - match dashboard markup -->
     <div class="top-nav">
       <div class="d-flex align-items-center gap-2">
         <img src="../asset/img/logo.png" style="height:34px;" alt="eTrack">
+        <span id="mobileUserName" class="mobile-username">User</span>
       </div>
       <button id="navMenuBtn" class="btn text-white" aria-label="Open menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/></svg></button>
     </div>
@@ -264,6 +268,13 @@
       const mobileMenu = document.getElementById('mobileMenu');
       const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
 
+      // populate sidebar and mobile username from localStorage
+      (function(){
+        const name = localStorage.getItem('etrack_user_name') || 'User';
+        const elName = document.getElementById('sidebarUserName'); if(elName) elName.textContent = name;
+        const mobileEl = document.getElementById('mobileUserName'); if(mobileEl) mobileEl.textContent = name;
+      })();
+
       navMenuBtn && navMenuBtn.addEventListener('click', ()=>{
         // on small screens, open the small mobile menu (dashboard pattern)
         if(window.innerWidth < 768){
@@ -311,41 +322,97 @@
         });
       }
 
-      // Income donut
-      (function(){
-        const ctx = document.getElementById('incomeDonut').getContext('2d');
-        const labels = ['Salary','Freelance','Other','Investments'];
-        const values = [9000000,2200000,1250000,0];
-        const colors = ['#0d6efd','#198754','#0dcaf0','#6f42c1'];
-        buildLegend('incomeLegend', labels, colors, values);
-        new Chart(ctx,{
-          type:'doughnut',
-          data:{labels, datasets:[{data: values, backgroundColor: colors, hoverOffset:6}]},
-          options:{
-            cutout:'70%',
-            plugins:{legend:{display:false}},
-            responsive:true,maintainAspectRatio:true
-          }
-        });
+      // -- Dynamic charting: fetch from backend and render --
+      let incomeChart = null;
+      let expenseChart = null;
+
+      function formatCurrency(v){
+        try{ return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(v); }catch(e){ return 'Rp '+v; }
+      }
+
+      async function getDonutData(type){
+        const month = new Date().toISOString().slice(0,7); // YYYY-MM
+        const userId = Number(localStorage.getItem('etrack_user_id') || 1);
+        const url = `/reports/donut?type=${encodeURIComponent(type)}&month=${encodeURIComponent(month)}&user_id=${encodeURIComponent(userId)}`;
+        try{
+          const res = await fetch(url);
+          if(!res.ok) throw new Error('network');
+          const json = await res.json();
+          return json;
+        }catch(err){
+          console.error('Failed to fetch donut data', err);
+          return null;
+        }
+      }
+
+      function renderDonut(canvasId, legendId, totalBtnSelector, data, colors){
+        const ctxEl = document.getElementById(canvasId);
+        if(!ctxEl) return null;
+        const labels = data.map(r=>r.category);
+        const values = data.map(r=>Number(r.total));
+        buildLegend(legendId, labels, colors, values);
+        // update total pill
+        const total = values.reduce((a,b)=>a+b,0);
+        const totalBtn = document.querySelector(totalBtnSelector);
+        if(totalBtn) totalBtn.innerHTML = `Total&nbsp;&nbsp;${formatCurrency(total)}`;
+
+        // destroy existing chart if present
+        if(canvasId === 'incomeDonut' && incomeChart) { incomeChart.destroy(); incomeChart = null; }
+        if(canvasId === 'expenseDonut' && expenseChart) { expenseChart.destroy(); expenseChart = null; }
+
+        const ctx = ctxEl.getContext('2d');
+        const cfg = {
+          type: 'doughnut',
+          data: { labels, datasets:[{ data: values, backgroundColor: colors, hoverOffset:6 }] },
+          options: { cutout:'70%', plugins:{legend:{display:false}}, responsive:true, maintainAspectRatio:true }
+        };
+        const chart = new Chart(ctx, cfg);
+        if(canvasId === 'incomeDonut') incomeChart = chart;
+        if(canvasId === 'expenseDonut') expenseChart = chart;
+        return chart;
+      }
+
+      // Helper to show empty state in legend area
+      function showNoData(legendId, totalBtnSelector){
+        const ul = document.getElementById(legendId);
+        if(ul) ul.innerHTML = '<li class="text-muted small">No data for selected month</li>';
+        const totalBtn = document.querySelector(totalBtnSelector);
+        if(totalBtn) totalBtn.innerHTML = `Total&nbsp;&nbsp;${formatCurrency(0)}`;
+      }
+
+      // Initialize Income chart on load
+      (async function initIncome(){
+        const data = await getDonutData('income');
+        if(!Array.isArray(data)) { showNoData('incomeLegend', '#incomeSection .total-pill'); return; }
+        if(data.length === 0) { showNoData('incomeLegend', '#incomeSection .total-pill'); return; }
+        const colors = ['#0d6efd','#198754','#0dcaf0','#6f42c1','#ffc107','#6c757d'];
+        renderDonut('incomeDonut','incomeLegend','#incomeSection .total-pill', data, colors);
       })();
 
-      // Expense donut
-      (function(){
-        const ctx = document.getElementById('expenseDonut').getContext('2d');
-        const labels = ['Rent','Food','Transport','Other'];
-        const values = [3000000,2400000,830000,1070000];
-        const colors = ['#0d6efd','#ffc107','#198754','#6c757d'];
-        buildLegend('expenseLegend', labels, colors, values);
-        new Chart(ctx,{
-          type:'doughnut',
-          data:{labels, datasets:[{data: values, backgroundColor: colors, hoverOffset:6}]},
-          options:{
-            cutout:'70%',
-            plugins:{legend:{display:false}},
-            responsive:true,maintainAspectRatio:true
+      // Expense chart: render on-demand when the Expenses tab is shown
+      async function ensureExpenseChart(){
+        if(expenseChart) return;
+        const data = await getDonutData('expense');
+        if(data === null) { showNoData('expenseLegend', '#expenseSection .total-pill'); return; }
+        if(data.length === 0) { showNoData('expenseLegend', '#expenseSection .total-pill'); return; }
+        const colors = ['#0d6efd','#ffc107','#198754','#6c757d','#fd7e14'];
+        renderDonut('expenseDonut','expenseLegend','#expenseSection .total-pill', data, colors);
+      }
+
+      // Update tab click handler to create expense chart on-demand
+      document.querySelectorAll('.report-tab').forEach(tab=>{
+        tab.addEventListener('click', async ()=>{
+          document.querySelectorAll('.report-tab').forEach(t=>t.classList.remove('active'));
+          tab.classList.add('active');
+          const target = tab.getAttribute('data-target');
+          document.querySelectorAll('main section').forEach(s=>s.classList.add('d-none'));
+          const el = document.getElementById(target);
+          el && el.classList.remove('d-none');
+          if(target === 'expenseSection'){
+            await ensureExpenseChart();
           }
         });
-      })();
+      });
     </script>
   </body>
 </html>
