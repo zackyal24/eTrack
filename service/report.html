@@ -151,7 +151,7 @@
           <div class="small-muted">Summary</div>
         </div>
         <div class="d-flex gap-2">
-          <button class="btn btn-outline-secondary btn-sm">Export</button>
+          <button id="exportBtn" class="btn btn-outline-secondary btn-sm">Export</button>
           <button class="btn btn-primary btn-sm">Customize</button>
         </div>
       </div>
@@ -186,10 +186,8 @@
               </div>
             </div>
             <div class="col-12 col-md-6">
-              <ul class="list-unstyled mb-0">
-                <li class="d-flex justify-content-between py-2 border-bottom"><div>Salary</div><div>Rp 9.000.000</div></li>
-                <li class="d-flex justify-content-between py-2 border-bottom"><div>Freelance</div><div>Rp 2.200.000</div></li>
-                <li class="d-flex justify-content-between py-2"><div>Other</div><div>Rp 1.250.000</div></li>
+              <ul id="incomeCategoryList" class="list-unstyled mb-0">
+                <li class="text-muted small">Loading categories...</li>
               </ul>
             </div>
           </div>
@@ -197,10 +195,8 @@
 
         <div class="report-card">
           <h6 class="mb-3">Recent Income</h6>
-          <ul class="list-group">
-            <li class="list-group-item d-flex justify-content-between align-items-center">Salary <span class="badge bg-success">Rp 9.000.000</span></li>
-            <li class="list-group-item d-flex justify-content-between align-items-center">Freelance <span class="badge bg-success">Rp 2.200.000</span></li>
-            <li class="list-group-item d-flex justify-content-between align-items-center">Gift <span class="badge bg-success">Rp 1.250.000</span></li>
+          <ul id="recentIncomeList" class="list-group">
+            <li class="list-group-item text-muted">Loading...</li>
           </ul>
         </div>
       </section>
@@ -235,10 +231,8 @@
               </div>
             </div>
             <div class="col-12 col-md-6">
-              <ul class="list-unstyled mb-0">
-                <li class="d-flex justify-content-between py-2 border-bottom"><div>Rent</div><div>Rp 3.000.000</div></li>
-                <li class="d-flex justify-content-between py-2 border-bottom"><div>Food</div><div>Rp 2.400.000</div></li>
-                <li class="d-flex justify-content-between py-2"><div>Transport</div><div>Rp 830.000</div></li>
+              <ul id="expenseCategoryList" class="list-unstyled mb-0">
+                <li class="text-muted small">Loading categories...</li>
               </ul>
             </div>
           </div>
@@ -246,10 +240,8 @@
 
         <div class="report-card">
           <h6 class="mb-3">Recent Expenses</h6>
-          <ul class="list-group">
-            <li class="list-group-item d-flex justify-content-between align-items-center">Rent <span class="badge bg-danger">Rp 3.000.000</span></li>
-            <li class="list-group-item d-flex justify-content-between align-items-center">Groceries <span class="badge bg-danger">Rp 1.200.000</span></li>
-            <li class="list-group-item d-flex justify-content-between align-items-center">Transport <span class="badge bg-danger">Rp 830.000</span></li>
+          <ul id="recentExpenseList" class="list-group">
+            <li class="list-group-item text-muted">Loading...</li>
           </ul>
         </div>
       </section>
@@ -330,10 +322,13 @@
         try{ return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(v); }catch(e){ return 'Rp '+v; }
       }
 
+      // Use backend on localhost if file:// protocol (helps when opening HTML directly)
+      const API_BASE = (location.protocol === 'file:') ? 'http://localhost:3000' : '';
+
       async function getDonutData(type){
         const month = new Date().toISOString().slice(0,7); // YYYY-MM
         const userId = Number(localStorage.getItem('etrack_user_id') || 1);
-        const url = `/reports/donut?type=${encodeURIComponent(type)}&month=${encodeURIComponent(month)}&user_id=${encodeURIComponent(userId)}`;
+        const url = `${API_BASE}/reports/donut?type=${encodeURIComponent(type)}&month=${encodeURIComponent(month)}&user_id=${encodeURIComponent(userId)}`;
         try{
           const res = await fetch(url);
           if(!res.ok) throw new Error('network');
@@ -387,6 +382,14 @@
         if(data.length === 0) { showNoData('incomeLegend', '#incomeSection .total-pill'); return; }
         const colors = ['#0d6efd','#198754','#0dcaf0','#6f42c1','#ffc107','#6c757d'];
         renderDonut('incomeDonut','incomeLegend','#incomeSection .total-pill', data, colors);
+        // render category list for income
+        renderCategoryList('incomeCategoryList', data);
+        // update the big total amount display
+        const incomeTotal = data.reduce((s,r)=>s+Number(r.total),0);
+        const incomeMain = document.querySelector('#incomeSection .amount');
+        if(incomeMain) incomeMain.textContent = formatCurrency(incomeTotal);
+        // load recent transactions to populate Recent Income/Expenses
+        await loadRecentTransactions();
       })();
 
       // Expense chart: render on-demand when the Expenses tab is shown
@@ -397,6 +400,11 @@
         if(data.length === 0) { showNoData('expenseLegend', '#expenseSection .total-pill'); return; }
         const colors = ['#0d6efd','#ffc107','#198754','#6c757d','#fd7e14'];
         renderDonut('expenseDonut','expenseLegend','#expenseSection .total-pill', data, colors);
+        renderCategoryList('expenseCategoryList', data);
+        const expenseTotal = data.reduce((s,r)=>s+Number(r.total),0);
+        const expenseMain = document.querySelector('#expenseSection .amount');
+        if(expenseMain) expenseMain.textContent = formatCurrency(expenseTotal);
+        await loadRecentTransactions();
       }
 
       // Update tab click handler to create expense chart on-demand
@@ -412,6 +420,128 @@
             await ensureExpenseChart();
           }
         });
+      });
+
+      // Fetch recent transactions and render Recent Income/Expenses
+      async function fetchRecentTransactions(limit = 10){
+        const userId = Number(localStorage.getItem('etrack_user_id') || 1);
+        const url = `${API_BASE}/transactions?user_id=${encodeURIComponent(userId)}&limit=${encodeURIComponent(limit)}`;
+        try{
+          const res = await fetch(url);
+          if(!res.ok) throw new Error('network');
+          const json = await res.json();
+          return json;
+        }catch(e){ console.error('Failed to fetch recent transactions', e); return []; }
+      }
+
+      async function loadRecentTransactions(){
+        const rows = await fetchRecentTransactions(20);
+        const incomeList = document.getElementById('recentIncomeList');
+        const expenseList = document.getElementById('recentExpenseList');
+        if(incomeList) incomeList.innerHTML = '';
+        if(expenseList) expenseList.innerHTML = '';
+
+        const incomeRows = rows.filter(r=>String(r.type).toLowerCase() === 'income');
+        const expenseRows = rows.filter(r=>String(r.type).toLowerCase() === 'expense');
+
+        const renderItem = (r, type) => {
+          const li = document.createElement('li');
+          li.className = 'list-group-item d-flex justify-content-between align-items-center';
+          const left = document.createElement('div');
+          left.textContent = r.description || r.category || ('Tx ' + r.id);
+          const badge = document.createElement('span');
+          badge.className = (type === 'income' ? 'badge bg-success' : 'badge bg-danger');
+          badge.textContent = formatCurrency(Number(r.amount || 0));
+          li.appendChild(left);
+          li.appendChild(badge);
+          return li;
+        };
+
+        if(incomeRows.length === 0){
+          if(incomeList) incomeList.innerHTML = '<li class="list-group-item text-muted">No recent income</li>';
+        } else {
+          incomeRows.slice(0,6).forEach(r=> incomeList.appendChild(renderItem(r,'income')));
+        }
+
+        if(expenseRows.length === 0){
+          if(expenseList) expenseList.innerHTML = '<li class="list-group-item text-muted">No recent expenses</li>';
+        } else {
+          expenseRows.slice(0,6).forEach(r=> expenseList.appendChild(renderItem(r,'expense')));
+        }
+      }
+
+      // Render category list (right column) from donut data
+      function renderCategoryList(containerId, data){
+        const el = document.getElementById(containerId);
+        if(!el) return;
+        el.innerHTML = '';
+        if(!Array.isArray(data) || data.length === 0){
+          el.innerHTML = '<li class="text-muted small">No categories</li>';
+          return;
+        }
+        data.forEach(d=>{
+          const li = document.createElement('li');
+          li.className = 'd-flex justify-content-between py-2 border-bottom';
+          const left = document.createElement('div'); left.textContent = d.category;
+          const right = document.createElement('div'); right.textContent = formatCurrency(Number(d.total || 0));
+          li.appendChild(left); li.appendChild(right);
+          el.appendChild(li);
+        });
+      }
+
+      // Export current report (CSV) — categories + recent transactions
+      async function exportCurrentReport(){
+        // determine active tab
+        const activeTab = document.querySelector('.report-tab.active');
+        const target = activeTab ? activeTab.getAttribute('data-target') : 'incomeSection';
+        const type = (target === 'expenseSection') ? 'expense' : 'income';
+
+        // fetch donut data and recent transactions
+        const donutData = await getDonutData(type) || [];
+        const recent = await fetchRecentTransactions(50) || [];
+
+        // build CSV content
+        const lines = [];
+        lines.push([`Report Type:`, type.toUpperCase(), `Generated:`, new Date().toISOString()].join(','));
+        lines.push('');
+        lines.push(['Category','Total'].join(','));
+        donutData.forEach(d => lines.push([`"${(d.category||'').replace(/"/g,'""') }"`, Number(d.total||0)].join(',')));
+        lines.push('');
+        lines.push(['Recent Transactions:','','',''].join(','));
+        lines.push(['id','date','type','category','description','amount'].join(','));
+        recent.forEach(r => {
+          const row = [
+            r.id,
+            r.occurred_at || r.date || '',
+            r.type || '',
+            `"${(r.category||'').toString().replace(/"/g,'""')}"`,
+            `"${(r.description||'').toString().replace(/"/g,'""')}"`,
+            Number(r.amount||0)
+          ];
+          lines.push(row.join(','));
+        });
+
+        const csv = lines.join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const month = new Date().toISOString().slice(0,7).replace('-','');
+        a.download = `report-${type}-${month}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      // bind export button
+      const exportBtn = document.getElementById('exportBtn');
+      if(exportBtn) exportBtn.addEventListener('click', async ()=>{
+        exportBtn.disabled = true;
+        exportBtn.textContent = 'Preparing...';
+        try{ await exportCurrentReport(); }catch(e){ console.error('Export failed', e); alert('Export failed: ' + (e && e.message)); }
+        exportBtn.disabled = false;
+        exportBtn.textContent = 'Export';
       });
     </script>
   </body>
