@@ -140,30 +140,76 @@ router.post('/:id/contribute', async (req, res) => {
     const b = req.body || {};
     const amt = b.amount != null ? Number(b.amount) : null;
     if(!goalId || amt === null || isNaN(amt)) return res.status(400).json({ error: 'goal id and amount required' });
-    // Best practice: record each contribution in a separate table for auditing/history
-    // and update the goals.current_amount in the same transaction.
+    // Record contribution and update goal in a transaction.
+    // Detect which contributions table exists (support common names).
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
 
-      // Insert contribution row
-      const insertSql = `INSERT INTO goal_contribution (goal_id, user_id, amount, note, created_at) VALUES (?, ?, ?, ?, NOW())`;
+      // detect table name
+      let contributionTable = null;
+      const checkNames = ['goal_contribution','goals_contribution','goal_contributions','goals_contributions'];
+      for (const name of checkNames) {
+        const [rows] = await conn.query("SHOW TABLES LIKE ?", [name]);
+        if (rows && rows.length) { contributionTable = name; break; }
+      }
+      if (!contributionTable) {
+        throw new Error('No contribution table found (expected one of: ' + checkNames.join(',') + ')');
+      }
+
+      // Inspect contribution table columns and build compatible INSERT
+      const [contribColsRows] = await conn.query('SHOW COLUMNS FROM \`' + contributionTable + '\`');
+      const contribCols = (contribColsRows || []).map(c => c.Field);
+      const insertFields = [];
+      const placeholders = [];
+      const values = [];
+
+      // helper to push a field if it exists
+      const pushIfExists = (fieldName, val, useNowForCreatedAt=false) => {
+        if (contribCols.includes(fieldName)) {
+          insertFields.push('`' + fieldName + '`');
+          if (useNowForCreatedAt) {
+            placeholders.push('NOW()');
+          } else {
+            placeholders.push('?');
+            values.push(val);
+          }
+        }
+      };
+
       const userId = b.user_id ? Number(b.user_id) : null;
       const note = b.note ? String(b.note) : null;
-      await conn.query(insertSql, [goalId, userId, amt, note]);
+
+      pushIfExists('goal_id', goalId);
+      pushIfExists('user_id', userId);
+      pushIfExists('amount', amt);
+      pushIfExists('note', note);
+      // prefer to set created_at via NOW() if the column exists and we didn't include it explicitly
+      if (contribCols.includes('created_at')) {
+        insertFields.push('`created_at`');
+        placeholders.push('NOW()');
+      }
+
+      if (insertFields.length === 0) {
+        throw new Error('No compatible columns found in contribution table ' + contributionTable);
+      }
+
+      const insertSql = `INSERT INTO \`${contributionTable}\` (${insertFields.join(',')}) VALUES (${placeholders.join(',')})`;
+      console.log('Inserting contribution into', contributionTable, 'SQL:', insertSql, 'values:', values);
+      const [insRes] = await conn.query(insertSql, values);
+      console.log('Contribution insert result:', insRes && insRes.insertId ? { insertId: insRes.insertId } : insRes);
 
       // Update the aggregated current_amount on goals table
-      // Use the column name 'current_amount' if present; otherwise try to find a close match
-      // For simplicity, attempt the standard column first and let server adapt as earlier implemented
       const updateSql = `UPDATE goals SET current_amount = current_amount + ? WHERE id = ?`;
       const [r] = await conn.query(updateSql, [amt, goalId]);
+      console.log('Goals update result:', r && typeof r.affectedRows !== 'undefined' ? { affectedRows: r.affectedRows } : r);
 
       await conn.commit();
-      res.json({ success: true, affectedRows: r.affectedRows });
+      res.json({ success: true, affectedRows: r.affectedRows, contributionInsertId: insRes && insRes.insertId });
     } catch (inner) {
-      await conn.rollback();
+      try { await conn.rollback(); } catch(e){}
       console.error('contribute transaction error', inner);
-      return res.status(500).json({ error: 'Failed to record contribution', detail: inner.message || inner });
+      return res.status(500).json({ error: 'Failed to record contribution', detail: inner.message || String(inner) });
     } finally {
       conn.release();
     }
