@@ -35,3 +35,29 @@ Notes
 
 - The code uses `mysql2/promise` connection pool. Ensure your MySQL server is running (XAMPP) and the `etrack` database exists and tables were created.
 - This is a minimal starting point. Add authentication, validation, and proper error handling before production.
+
+Migrations
+
+- A simple SQL migration to create the `goals` table is available at `backend/migrations/001_create_goals.sql`.
+- To apply it using the MySQL CLI (replace user/db as needed):
+
+```bash
+mysql -u root -p etrack < backend/migrations/001_create_goals.sql
+```
+
+- Or open the file in phpMyAdmin and run the SQL manually.
+
+Contributions table
+
+- A `goal_contribution` table is provided in `backend/migrations/003_create_goal_contribution.sql`. Its purpose:
+	- store each contribution event (amount, who contributed, timestamp, optional note)
+	- provide an auditable history for goals, enabling reporting and undoing/migration if needed
+	- keep `goals.current_amount` as a denormalized aggregate for quick reads
+
+- Apply it as above:
+
+```bash
+mysql -u root -p etrack < backend/migrations/003_create_goal_contribution.sql
+```
+
+- After migrating, contribution actions from the UI will insert into this table and update `goals.current_amount` inside a transaction.

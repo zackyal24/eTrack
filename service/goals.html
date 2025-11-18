@@ -175,87 +175,7 @@
       </div>
 
       <div id="goalsList" class="goals-wrap">
-        <!-- sample goals -->
-        <div class="goal-card">
-          <div class="goal-head">
-            <div class="d-flex align-items-start gap-3">
-              <div class="goal-icon">🏝️</div>
-              <div>
-                <div class="fw-bold">Trip to Bali</div>
-                <div class="goal-meta">30 days left</div>
-              </div>
-            </div>
-            <div class="text-end small">
-              <div>Rp 2.000.000</div>
-              <div class="text-muted">Rp 6.000.000</div>
-            </div>
-          </div>
-          <div class="amount-row">
-            <div class="left">Rp 2.000.000</div>
-            <div class="right">Rp 6.000.000</div>
-          </div>
-          <div class="goal-progress">
-            <div class="progress"><div class="progress-bar" role="progressbar" style="width:33%" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100"></div></div>
-            <div class="pct">33% progress</div>
-          </div>
-          <div class="d-flex justify-content-center mt-3">
-            <button class="contribute-btn" data-goal="Trip to Bali">Contribute</button>
-          </div>
-        </div>
-
-        <div class="goal-card">
-          <div class="goal-head">
-            <div class="d-flex align-items-start gap-3">
-              <div class="goal-icon">💻</div>
-              <div>
-                <div class="fw-bold">Buy Laptop</div>
-                <div class="goal-meta">30 days left</div>
-              </div>
-            </div>
-            <div class="text-end small">
-              <div>Rp 3.200.000</div>
-              <div class="text-muted">Rp 12.000.000</div>
-            </div>
-          </div>
-          <div class="amount-row">
-            <div class="left">Rp 3.200.000</div>
-            <div class="right">Rp 12.000.000</div>
-          </div>
-          <div class="goal-progress">
-            <div class="progress"><div class="progress-bar" role="progressbar" style="width:27%" aria-valuenow="27" aria-valuemin="0" aria-valuemax="100"></div></div>
-            <div class="pct">27% progress</div>
-          </div>
-          <div class="d-flex justify-content-center mt-3">
-            <button class="contribute-btn" data-goal="Buy Laptop">Contribute</button>
-          </div>
-        </div>
-
-        <div class="goal-card">
-          <div class="goal-head">
-            <div class="d-flex align-items-start gap-3">
-              <div class="goal-icon">🏃</div>
-              <div>
-                <div class="fw-bold">Treadmill</div>
-                <div class="goal-meta">35 days left</div>
-              </div>
-            </div>
-            <div class="text-end small">
-              <div>Rp 900.000</div>
-              <div class="text-muted">Rp 3.500.000</div>
-            </div>
-          </div>
-          <div class="amount-row">
-            <div class="left">Rp 900.000</div>
-            <div class="right">Rp 3.500.000</div>
-          </div>
-          <div class="goal-progress">
-            <div class="progress"><div class="progress-bar" role="progressbar" style="width:26%" aria-valuenow="26" aria-valuemin="0" aria-valuemax="100"></div></div>
-            <div class="pct">26% progress</div>
-          </div>
-          <div class="d-flex justify-content-center mt-3">
-            <button class="contribute-btn" data-goal="Treadmill">Contribute</button>
-          </div>
-        </div>
+        <div class="text-muted">Loading goals…</div>
       </div>
 
     </div>
@@ -294,6 +214,9 @@
   </div>
 
   <script>
+    // Base API URL — adjust if your backend runs on a different host/port
+    const API_BASE = 'http://localhost:3000';
+
     // Sidebar / mobile menu toggle (reuse pattern)
     const sidebar = document.querySelector('.app-sidebar');
     const navMenuBtn = document.getElementById('navMenuBtn');
@@ -321,75 +244,151 @@
     sidebarOverlay && sidebarOverlay.addEventListener('click', () => closeSidebar());
     mobileMenuOverlay && mobileMenuOverlay.addEventListener('click', () => { mobileMenu.classList.remove('show'); mobileMenuOverlay.classList.remove('show'); mobileMenu.setAttribute('aria-hidden','true'); mobileMenuOverlay.setAttribute('aria-hidden','true'); });
 
-    // Popups
+    // Popups and forms
     const contributeOverlay = document.getElementById('contributeOverlay');
     const addGoalOverlay = document.getElementById('addGoalOverlay');
     const contributeForm = document.getElementById('contributeForm');
     const addGoalForm = document.getElementById('addGoalForm');
-    let activeGoalName = null;
+    const goalsListEl = document.getElementById('goalsList');
+    let activeGoalId = null;
 
-    document.querySelectorAll('.contribute-btn').forEach(btn => btn.addEventListener('click', (e) => {
-      activeGoalName = e.currentTarget.dataset.goal || 'Contribute';
-      document.getElementById('contributeTitle').textContent = 'Contribute to ' + activeGoalName;
-      contributeOverlay.classList.add('show'); contributeOverlay.setAttribute('aria-hidden','false');
-      document.getElementById('contributeAmount').focus();
-    }));
+    function getUserId() {
+      const id = localStorage.getItem('etrack_user_id');
+      return id ? Number(id) : null;
+    }
 
-    document.getElementById('contribCancel').addEventListener('click', () => {
-      contributeOverlay.classList.remove('show'); contributeOverlay.setAttribute('aria-hidden','true');
-      contributeForm.reset();
-    });
+    function fmtCurrency(n){
+      try { return 'Rp ' + new Intl.NumberFormat('id-ID').format(Number(n || 0)); } catch(e){ return 'Rp ' + (n || 0); }
+    }
 
-    contributeForm.addEventListener('submit', (e) => {
+    function daysLeft(deadline){
+      if(!deadline) return '';
+      const d = new Date(deadline);
+      const now = new Date();
+      const diff = Math.ceil((d - now) / (1000*60*60*24));
+      if(isNaN(diff)) return '';
+      return diff >= 0 ? `${diff} days left` : 'past due';
+    }
+
+    async function loadGoals(){
+      const userId = getUserId();
+      if(!userId){ console.warn('no user id in localStorage'); return; }
+      try{
+        const res = await fetch(`${API_BASE}/goals?user_id=${userId}`);
+        if(!res.ok) throw new Error('Failed to fetch goals');
+        const data = await res.json();
+        renderGoals(data);
+      }catch(err){ console.error('loadGoals error', err); }
+    }
+
+    // Improve user-visible error when goals fail to load
+    async function loadGoalsWithUI(){
+      const el = document.getElementById('goalsList');
+      el.innerHTML = '<div class="text-muted">Loading goals…</div>';
+      try{
+        await loadGoals();
+      }catch(err){
+        console.error('loadGoalsWithUI error', err);
+        el.innerHTML = `<div class="text-danger">Failed to load goals: ${escapeHtml(String(err.message || err))}</div>`;
+      }
+    }
+
+    function renderGoals(goals){
+      goalsListEl.innerHTML = '';
+      if(!goals || goals.length === 0){
+        goalsListEl.innerHTML = '<div class="text-muted">No goals yet. Click "+ add goal" to create one.</div>';
+        return;
+      }
+
+      goals.forEach(g => {
+        const pct = g.target_amount > 0 ? Math.round((g.current_amount / g.target_amount) * 100) : 0;
+        const card = document.createElement('div'); card.className = 'goal-card';
+        card.innerHTML = `
+          <div class="goal-head">
+            <div class="d-flex align-items-start gap-3">
+              <div class="goal-icon">🎯</div>
+              <div>
+                <div class="fw-bold">${escapeHtml(g.name)}</div>
+                <div class="goal-meta">${daysLeft(g.deadline)}</div>
+              </div>
+            </div>
+            <div class="text-end small">
+              <div>${fmtCurrency(g.current_amount)}</div>
+              <div class="text-muted">${fmtCurrency(g.target_amount)}</div>
+            </div>
+          </div>
+          <div class="amount-row">
+            <div class="left">${fmtCurrency(g.current_amount)}</div>
+            <div class="right">${fmtCurrency(g.target_amount)}</div>
+          </div>
+          <div class="goal-progress">
+            <div class="progress"><div class="progress-bar" role="progressbar" style="width:${pct}%" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"></div></div>
+            <div class="pct">${pct}% progress</div>
+          </div>
+          <div class="d-flex justify-content-center mt-3">
+            <button class="contribute-btn" data-goal-id="${g.id}">Contribute</button>
+          </div>`;
+
+        // attach handlers
+        const btn = card.querySelector('.contribute-btn');
+        btn && btn.addEventListener('click', (ev) => {
+          activeGoalId = Number(ev.currentTarget.dataset.goalId);
+          document.getElementById('contributeTitle').textContent = 'Contribute to ' + g.name;
+          contributeOverlay.classList.add('show'); contributeOverlay.setAttribute('aria-hidden','false');
+          document.getElementById('contributeAmount').focus();
+        });
+
+        goalsListEl.appendChild(card);
+      });
+    }
+
+    function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;'); }
+
+    // Contribute form submit -> POST /goals/:id/contribute
+    contributeForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      // demo behaviour: close and alert
-      const amt = document.getElementById('contributeAmount').value;
-      contributeOverlay.classList.remove('show'); contributeOverlay.setAttribute('aria-hidden','true');
-      contributeForm.reset();
-      alert('Contributed Rp ' + amt + ' to ' + activeGoalName + ' (demo)');
+      const amt = parseFloat(document.getElementById('contributeAmount').value || 0);
+      if(!activeGoalId || isNaN(amt) || amt <= 0){ alert('Enter a valid amount'); return; }
+      try{
+        const res = await fetch(`${API_BASE}/goals/${activeGoalId}/contribute`, {
+          method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: getUserId(), amount: amt })
+        });
+        if(!res.ok) throw new Error('contribute failed');
+        contributeForm.reset(); contributeOverlay.classList.remove('show'); contributeOverlay.setAttribute('aria-hidden','true');
+        await loadGoals();
+      }catch(err){ console.error(err); alert('Failed to contribute'); }
     });
 
-    // Add goal
+    document.getElementById('contribCancel').addEventListener('click', () => { contributeOverlay.classList.remove('show'); contributeOverlay.setAttribute('aria-hidden','true'); contributeForm.reset(); activeGoalId = null; });
+
+    // Add goal: open/close
     const addGoalBtn = document.getElementById('addGoalBtn');
     addGoalBtn && addGoalBtn.addEventListener('click', () => { addGoalOverlay.classList.add('show'); addGoalOverlay.setAttribute('aria-hidden','false'); addGoalForm.querySelector('[name="name"]').focus(); });
     document.getElementById('addCancel').addEventListener('click', () => { addGoalOverlay.classList.remove('show'); addGoalOverlay.setAttribute('aria-hidden','true'); addGoalForm.reset(); });
 
-    addGoalForm.addEventListener('submit', (e) => {
+    // Add goal submit -> POST /goals
+    addGoalForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const data = new FormData(addGoalForm);
-      const name = data.get('name');
-      const target = parseFloat(data.get('target')) || 0;
-      const current = parseFloat(data.get('current')) || 0;
-      const pct = target > 0 ? Math.round((current/target)*100) : 0;
-
-      // create card
-      const card = document.createElement('div'); card.className = 'goal-card';
-      card.innerHTML = `
-        <div class="goal-head">
-          <div>
-            <div class="fw-bold">${name}</div>
-            <div class="goal-meta">Target Rp ${target.toLocaleString()} · Current Rp ${current.toLocaleString()}</div>
-          </div>
-          <div style="min-width:110px; text-align:right;">
-            <button class="contribute-btn" data-goal="${name}">Contribute</button>
-          </div>
-        </div>
-        <div class="goal-progress">
-          <div class="progress"><div class="progress-bar" role="progressbar" style="width:${pct}%; background:linear-gradient(90deg,#0f7a4d,#0b6e42); border-radius:8px;" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"></div></div>
-          <div class="small text-muted">${pct}%</div>
-        </div>`;
-
-      const list = document.getElementById('goalsList');
-      list.prepend(card);
-
-      // wire the contribute button on the new card
-      card.querySelector('.contribute-btn').addEventListener('click', (ev) => {
-        activeGoalName = ev.currentTarget.dataset.goal;
-        document.getElementById('contributeTitle').textContent = 'Contribute to ' + activeGoalName;
-        contributeOverlay.classList.add('show'); contributeOverlay.setAttribute('aria-hidden','false');
-      });
-
-      addGoalOverlay.classList.remove('show'); addGoalOverlay.setAttribute('aria-hidden','true'); addGoalForm.reset();
+      const fd = new FormData(addGoalForm);
+      const payload = {
+        user_id: getUserId(),
+        name: fd.get('name'),
+        target_amount: parseFloat(fd.get('target')) || 0,
+        current_amount: parseFloat(fd.get('current')) || 0,
+        deadline: fd.get('deadline') || null
+      };
+      if(!payload.name || payload.target_amount <= 0){ alert('Please provide a name and target amount'); return; }
+      try{
+        const res = await fetch(`${API_BASE}/goals`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        if(!res.ok){
+          let body = null;
+          try { body = await res.json(); } catch(e){}
+          const msg = (body && (body.error || body.message)) ? (body.error || body.message) : 'create failed';
+          throw new Error(msg);
+        }
+        addGoalForm.reset(); addGoalOverlay.classList.remove('show'); addGoalOverlay.setAttribute('aria-hidden','true');
+        await loadGoals();
+      }catch(err){ console.error('add goal error', err); alert('Failed to add goal: ' + (err.message || err)); }
     });
 
     // close popups on ESC or click outside
@@ -397,14 +396,17 @@
       if (ev.key === 'Escape') {
         contributeOverlay.classList.remove('show'); contributeOverlay.setAttribute('aria-hidden','true');
         addGoalOverlay.classList.remove('show'); addGoalOverlay.setAttribute('aria-hidden','true');
+        activeGoalId = null;
       }
     });
 
     // click outside to close
     [contributeOverlay, addGoalOverlay].forEach(ov => ov && ov.addEventListener('click', (ev) => {
-      if (ev.target === ov) { ov.classList.remove('show'); ov.setAttribute('aria-hidden','true'); }
+      if (ev.target === ov) { ov.classList.remove('show'); ov.setAttribute('aria-hidden','true'); activeGoalId = null; }
     }));
 
+    // initial load (show UI errors when fetch fails)
+    loadGoalsWithUI();
   </script>
 </body>
 </html>
