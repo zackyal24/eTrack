@@ -7,15 +7,36 @@ router.get('/', async (req, res) => {
   try {
     const userId = req.query.user_id ? Number(req.query.user_id) : 1;
     const limit = req.query.limit ? Number(req.query.limit) : 20;
-    const sql = `
-      SELECT t.id, t.occurred_at, t.description, t.amount, t.type, c.name AS category
+    // optional date filters
+    const start = req.query.start || null; // YYYY-MM-DD
+    const end = req.query.end || null;     // YYYY-MM-DD
+    const month = req.query.month || null; // YYYY-MM (alternative)
+
+    // base SQL
+    let sql = `
+      SELECT t.id, DATE_FORMAT(t.occurred_at, '%Y-%m-%dT%H:%i:%s') AS occurred_at, t.description, t.amount, t.type, c.name AS category
       FROM transactions t
       LEFT JOIN categories c ON c.id = t.category_id
-      WHERE t.user_id = ? AND t.deleted_at IS NULL
-      ORDER BY t.occurred_at DESC
-      LIMIT ?
-    `;
-    const [rows] = await pool.query(sql, [userId, limit]);
+      WHERE t.user_id = ?`;
+    const params = [userId];
+
+    // only include deleted_at filter if the column exists (defensive)
+    // We'll attempt to check columns quickly (non-blocking) -- assume column present for normal installs
+    sql += ' AND t.deleted_at IS NULL';
+
+    // Prefer month param when provided (simpler for month-based UIs)
+    if (month) {
+      sql += " AND DATE_FORMAT(t.occurred_at, '%Y-%m') = ?";
+      params.push(month);
+    } else if (start && end) {
+      sql += ' AND DATE(t.occurred_at) BETWEEN ? AND ?';
+      params.push(start, end);
+    }
+
+    sql += ' ORDER BY t.occurred_at DESC LIMIT ?';
+    params.push(limit);
+
+    const [rows] = await pool.query(sql, params);
     res.json(rows);
   } catch (err) {
     console.error('transactions list error', err);

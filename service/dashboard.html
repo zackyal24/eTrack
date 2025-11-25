@@ -295,8 +295,9 @@
     <!-- Unified Month + Summary (single colored bar) -->
     <div class="summary-row d-flex align-items-center justify-content-between mt-3">
       <div class="d-flex align-items-center gap-2">
-        <div class="fw-semibold">March 2025</div>
-        <div class="small">▼</div>
+        <button id="prevMonth" class="btn btn-sm btn-light">◀</button>
+        <div id="monthLabel" class="fw-semibold">March 2025</div>
+        <button id="nextMonth" class="btn btn-sm btn-light">▶</button>
       </div>
 
       <div class="d-flex gap-3 align-items-center">
@@ -455,7 +456,7 @@
   </script>
   <script>
     // Fetch recent transactions and monthly summary from backend and render
-    (async function(){
+    (function(){
       const API_BASE = 'http://localhost:3000';
       const userId = Number(localStorage.getItem('etrack_user_id') || 1);
 
@@ -463,61 +464,82 @@
         try{ return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(v); }catch(e){ return 'Rp '+v; }
       }
 
-      // compute month start/end
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth();
-      const start = new Date(year, month, 1).toISOString().slice(0,10);
-      const end = new Date(year, month+1, 0).toISOString().slice(0,10);
+      // selectedMonth: Date pointing to first day of selected month
+      let selectedMonth = new Date();
+      selectedMonth.setDate(1);
 
-      // get summary for current month
-      try{
-        const sres = await fetch(`${API_BASE}/reports/summary?start=${start}&end=${end}&user_id=${userId}`);
-        if(sres.ok){
-          const sjson = await sres.json();
-          let income = 0, expense = 0;
-          sjson.forEach(r => {
-            if(r.type === 'income') income += Number(r.total || 0);
-            if(r.type === 'expense') expense += Number(r.total || 0);
-          });
-          const balance = income - expense;
-          const incEl = document.getElementById('incomeValue'); if(incEl) incEl.textContent = formatCurrency(income);
-          const expEl = document.getElementById('expensesValue'); if(expEl) expEl.textContent = formatCurrency(expense);
-          const balEl = document.getElementById('balanceValue'); if(balEl) balEl.textContent = formatCurrency(balance);
-        }
-      }catch(err){ console.error('summary fetch error', err); }
+      const monthLabel = document.getElementById('monthLabel');
+      const prevBtn = document.getElementById('prevMonth');
+      const nextBtn = document.getElementById('nextMonth');
 
-      // fetch recent transactions
-      try{
-        const tres = await fetch(`${API_BASE}/transactions?user_id=${userId}&limit=50`);
-        if(!tres.ok) throw new Error('fail');
-        const tx = await tres.json();
-        const list = document.getElementById('transactionsList');
-        if(!list) return;
-        list.innerHTML = '';
+      function toYMD(d){ return d.toISOString().slice(0,10); }
+      function startOfMonth(d){ const y=d.getFullYear(), m=d.getMonth(); return new Date(y,m,1); }
+      function endOfMonth(d){ const y=d.getFullYear(), m=d.getMonth(); return new Date(y,m+1,0); }
+      function formatMonthLabel(d){ return d.toLocaleString('id-ID', { month:'long', year:'numeric' }); }
 
-        // group by date (YYYY-MM-DD)
-        let lastDate = null;
-        tx.forEach(t => {
-          const d = t.occurred_at ? t.occurred_at.split('T')[0] : '';
-          if(d !== lastDate){
-            const dateHeader = document.createElement('div');
-            dateHeader.className = 'px-3 mt-3 small text-muted';
-            const dateObj = new Date(d + 'T00:00:00');
-            dateHeader.textContent = isNaN(dateObj.getTime()) ? d : dateObj.toLocaleDateString('id-ID', { weekday:'short', day:'2-digit', month:'long', year:'numeric' });
-            list.appendChild(dateHeader);
-            lastDate = d;
+      async function loadForMonth(){
+        if(monthLabel) monthLabel.textContent = formatMonthLabel(selectedMonth);
+        const start = toYMD(startOfMonth(selectedMonth));
+        const end = toYMD(endOfMonth(selectedMonth));
+
+        // get summary for selected month
+        try{
+          const sres = await fetch(`${API_BASE}/reports/summary?start=${start}&end=${end}&user_id=${userId}`);
+          if(sres.ok){
+            const sjson = await sres.json();
+            let income = 0, expense = 0;
+            sjson.forEach(r => {
+              // note: r.type may be backticked or different; normalize
+              const t = (r.type || '').toString().toLowerCase();
+              if(t === 'income') income += Number(r.total || 0);
+              if(t === 'expense') expense += Number(r.total || 0);
+            });
+            const balance = income - expense;
+            const incEl = document.getElementById('incomeValue'); if(incEl) incEl.textContent = formatCurrency(income);
+            const expEl = document.getElementById('expensesValue'); if(expEl) expEl.textContent = formatCurrency(expense);
+            const balEl = document.getElementById('balanceValue'); if(balEl) balEl.textContent = formatCurrency(balance);
           }
+        }catch(err){ console.error('summary fetch error', err); }
 
-          const card = document.createElement('div');
-          card.className = 'tx-card d-flex align-items-center gap-3';
-          const icon = document.createElement('div'); icon.className = 'tx-icon'; icon.textContent = '💸';
-          const title = document.createElement('div'); title.className = 'flex-grow-1'; title.innerHTML = `<div class="fw-bold">${t.category || 'Uncategorized'}</div><div class="small text-muted">${t.description || ''}</div>`;
-          const amt = document.createElement('div'); amt.className = (t.type === 'income') ? 'text-success fw-semibold' : 'text-danger fw-semibold'; amt.textContent = (t.type === 'income' ? '+ ' : '- ') + formatCurrency(Number(t.amount || 0));
-          card.appendChild(icon); card.appendChild(title); card.appendChild(amt);
-          list.appendChild(card);
-        });
-      }catch(err){ console.error('transactions fetch error', err); }
+        // fetch recent transactions for the selected month
+        try{
+          const tres = await fetch(`${API_BASE}/transactions?user_id=${userId}&start=${start}&end=${end}&limit=500`);
+          if(!tres.ok) throw new Error('fail');
+          const tx = await tres.json();
+          const list = document.getElementById('transactionsList');
+          if(!list) return;
+          list.innerHTML = '';
+
+          // group by date (YYYY-MM-DD)
+          let lastDate = null;
+          tx.forEach(t => {
+            const d = t.occurred_at ? t.occurred_at.split('T')[0] : '';
+            if(d !== lastDate){
+              const dateHeader = document.createElement('div');
+              dateHeader.className = 'px-3 mt-3 small text-muted';
+              const dateObj = new Date(d + 'T00:00:00');
+              dateHeader.textContent = isNaN(dateObj.getTime()) ? d : dateObj.toLocaleDateString('id-ID', { weekday:'short', day:'2-digit', month:'long', year:'numeric' });
+              list.appendChild(dateHeader);
+              lastDate = d;
+            }
+
+            const card = document.createElement('div');
+            card.className = 'tx-card d-flex align-items-center gap-3';
+            const icon = document.createElement('div'); icon.className = 'tx-icon'; icon.textContent = '💸';
+            const title = document.createElement('div'); title.className = 'flex-grow-1'; title.innerHTML = `<div class="fw-bold">${t.category || 'Uncategorized'}</div><div class="small text-muted">${t.description || ''}</div>`;
+            const amt = document.createElement('div'); amt.className = (t.type === 'income') ? 'text-success fw-semibold' : 'text-danger fw-semibold'; amt.textContent = (t.type === 'income' ? '+ ' : '- ') + formatCurrency(Number(t.amount || 0));
+            card.appendChild(icon); card.appendChild(title); card.appendChild(amt);
+            list.appendChild(card);
+          });
+        }catch(err){ console.error('transactions fetch error', err); }
+      }
+
+      // wire month buttons
+      if(prevBtn) prevBtn.addEventListener('click', ()=>{ selectedMonth.setMonth(selectedMonth.getMonth()-1); loadForMonth(); });
+      if(nextBtn) nextBtn.addEventListener('click', ()=>{ selectedMonth.setMonth(selectedMonth.getMonth()+1); loadForMonth(); });
+
+      // initial load
+      loadForMonth();
     })();
   </script>
 </body>

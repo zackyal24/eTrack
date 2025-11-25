@@ -162,11 +162,11 @@
             <div>
               <div class="small-muted">Total income</div>
               <div class="amount-row">
-                <div class="amount">Rp 12.450.000</div>
-                <div class="small-muted">+12% from last month</div>
+                <div id="incomeMainAmount" class="amount">Rp 0</div>
+                <div id="incomeChange" class="small-muted"></div>
               </div>
             </div>
-            <div class="text-end small-muted">Nov 2025</div>
+            <div id="incomeMonthLabel" class="text-end small-muted"></div>
           </div>
           <hr/>
           <div class="row g-3">
@@ -181,7 +181,7 @@
                   </div>
                 </div>
                 <div style="display:flex;justify-content:center;margin-top:.75rem">
-                  <button class="btn btn-outline-primary btn-sm total-pill">Total&nbsp;&nbsp;Rp15.000.000</button>
+                  <button class="btn btn-outline-primary btn-sm total-pill">Total&nbsp;&nbsp;Rp 0</button>
                 </div>
               </div>
             </div>
@@ -207,11 +207,11 @@
             <div>
               <div class="small-muted">Total expenses</div>
               <div class="amount-row">
-                <div class="amount">Rp 8.230.000</div>
-                <div class="small-muted">-5% from last month</div>
+                <div id="expenseMainAmount" class="amount">Rp 0</div>
+                <div id="expenseChange" class="small-muted"></div>
               </div>
             </div>
-            <div class="text-end small-muted">Nov 2025</div>
+            <div id="expenseMonthLabel" class="text-end small-muted"></div>
           </div>
           <hr/>
           <div class="row g-3">
@@ -226,7 +226,7 @@
                   </div>
                 </div>
                 <div style="display:flex;justify-content:center;margin-top:.75rem">
-                  <button class="btn btn-outline-primary btn-sm total-pill">Total&nbsp;&nbsp;Rp15.000.000</button>
+                  <button class="btn btn-outline-primary btn-sm total-pill">Total&nbsp;&nbsp;Rp 0</button>
                 </div>
               </div>
             </div>
@@ -386,8 +386,11 @@
         renderCategoryList('incomeCategoryList', data);
         // update the big total amount display
         const incomeTotal = data.reduce((s,r)=>s+Number(r.total),0);
-        const incomeMain = document.querySelector('#incomeSection .amount');
+        const incomeMain = document.getElementById('incomeMainAmount') || document.querySelector('#incomeSection .amount');
         if(incomeMain) incomeMain.textContent = formatCurrency(incomeTotal);
+        // set month label
+        const monthLabelEl = document.getElementById('incomeMonthLabel');
+        try{ const md = new Date(new Date().toISOString().slice(0,7) + '-01'); if(monthLabelEl) monthLabelEl.textContent = md.toLocaleString('id-ID',{month:'long', year:'numeric'}); }catch(e){}
         // load recent transactions to populate Recent Income/Expenses
         await loadRecentTransactions();
       })();
@@ -402,8 +405,10 @@
         renderDonut('expenseDonut','expenseLegend','#expenseSection .total-pill', data, colors);
         renderCategoryList('expenseCategoryList', data);
         const expenseTotal = data.reduce((s,r)=>s+Number(r.total),0);
-        const expenseMain = document.querySelector('#expenseSection .amount');
+        const expenseMain = document.getElementById('expenseMainAmount') || document.querySelector('#expenseSection .amount');
         if(expenseMain) expenseMain.textContent = formatCurrency(expenseTotal);
+        const expenseMonthEl = document.getElementById('expenseMonthLabel');
+        try{ const md = new Date(new Date().toISOString().slice(0,7) + '-01'); if(expenseMonthEl) expenseMonthEl.textContent = md.toLocaleString('id-ID',{month:'long', year:'numeric'}); }catch(e){}
         await loadRecentTransactions();
       }
 
