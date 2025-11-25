@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 18 Nov 2025 pada 13.50
+-- Waktu pembuatan: 25 Nov 2025 pada 14.16
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.0.30
 
@@ -142,7 +142,9 @@ CREATE TABLE `transactions` (
 
 INSERT INTO `transactions` (`id`, `user_id`, `account_id`, `category_id`, `type`, `amount`, `currency`, `occurred_at`, `description`, `payment_type`, `tags`, `is_recurring`, `created_at`, `updated_at`, `deleted_at`) VALUES
 (1, 223, NULL, 3, 'income', 20000, 'IDR', '2025-11-17 00:00:00', 'bekel', 'Cash', NULL, 0, '2025-11-17 19:06:46', '2025-11-17 19:06:46', NULL),
-(2, 223, NULL, 4, 'expense', 50000, 'IDR', '2025-11-17 00:00:00', 'bakso', 'Cash', NULL, 0, '2025-11-17 20:20:18', '2025-11-17 20:20:18', NULL);
+(2, 223, NULL, 4, 'expense', 50000, 'IDR', '2025-11-17 00:00:00', 'bakso', 'Cash', NULL, 0, '2025-11-17 20:20:18', '2025-11-17 20:20:18', NULL),
+(3, 223, NULL, 3, 'income', 20, 'IDR', '2025-11-25 00:00:00', 'waw', 'Cash', NULL, 0, '2025-11-25 19:58:30', '2025-11-25 19:58:30', NULL),
+(4, 223, NULL, 3, 'income', 50000, 'IDR', '2025-11-25 00:00:00', 'apa', 'Cash', NULL, 0, '2025-11-25 20:08:05', '2025-11-25 20:08:05', NULL);
 
 -- --------------------------------------------------------
 
@@ -253,7 +255,7 @@ ALTER TABLE `goal_contributions`
 -- AUTO_INCREMENT untuk tabel `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`
