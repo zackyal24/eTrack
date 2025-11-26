@@ -1,546 +1,445 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>eTrack — Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body { background:#ffffff; font-family:'Inter', sans-serif; }
-
-    /* Sidebar (left strip) - updated gradient and elevated */
-    .app-sidebar {
-      position:fixed;
-      left:0;
-      top:0;
-      height:100vh;
-      width:200px;
-  background: linear-gradient(180deg, #0056d2 0%, #003b82 100%);
-      padding:18px 14px;
-      box-sizing:border-box;
-      color: #ffffff;
-      box-shadow: 0 12px 36px rgba(3,59,130,0.12);
-      transition: transform .18s ease, box-shadow .18s ease;
-      z-index: 1040;
-      border-right: 1px solid rgba(255,255,255,0.04);
-    }
-
-    /* subtle lift on hover for pointer devices */
-    @media (hover: hover) and (pointer: fine) {
-      .app-sidebar:hover { transform: translateY(-6px); box-shadow: 0 20px 44px rgba(3,59,130,0.18); }
-    }
-
-  .app-sidebar .brand { display:flex; flex-direction:column; align-items:center; justify-content:center; margin-bottom:18px; padding-top:12px; gap:8px; }
-  .app-sidebar .brand img { height:56px; width:56px; object-fit:cover; border-radius:10px; box-shadow:0 8px 26px rgba(3,59,130,0.14); }
-  .app-sidebar .nav-list { margin-top:8px; display:flex; flex-direction:column; gap:12px; }
-  .app-sidebar a.nav-link { color: rgba(255,255,255,0.95); text-decoration:none; font-weight:600; padding:10px 12px; border-radius:8px; display:block; }
-  .app-sidebar a.nav-link:hover { background: rgba(255,255,255,0.06); transform: translateY(-3px); transition: all .14s ease; }
-  .app-sidebar a.nav-link.active, .app-sidebar a.nav-link.active:hover { background: rgba(255,255,255,0.12); color: #fff; }
-  .app-sidebar a.nav-link.logout { color: rgba(255,255,255,0.9); opacity:0.95; }
-  .app-sidebar { padding:22px 14px; border-top-right-radius:12px; border-bottom-right-radius:12px; }
-
-    /* push main content to the right of sidebar on wider screens */
-    @media(min-width: 768px){
-      /* top-nav hidden on desktop; content offset handled by .main padding-left helper */
-      .top-nav { display: none !important; }
-    }
-
-    /* mobile: hide sidebar by default and provide a small strip button */
-      @media(max-width: 767px) {
-      .app-sidebar { transform: translateX(-100%); transition: transform .22s ease; z-index:1055; }
-      .app-sidebar.open { transform: translateX(0); }
-      .sidebar-overlay { display:none; }
-      .sidebar-overlay.show { display:block; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1050; }
-      /* ensure main content not pushed on mobile */
-      .container-dashboard { margin-left:0; padding:12px; }
-      .form-wrap { margin-left:0; }
-    }
-
-    /* mobile small menu (anchored to navbar menu button) */
-    .mobile-menu-overlay { display:none; }
-    .mobile-menu-overlay.show { display:block; position:fixed; inset:0; background:rgba(0,0,0,0.25); z-index:1050; }
-    .mobile-menu {
-      position:fixed; top:56px; right:12px; z-index:1060;
-      background: rgba(255,255,255,0.98); backdrop-filter: blur(4px);
-      border-radius:8px; box-shadow:0 8px 20px rgba(0,0,0,0.12);
-      min-width:160px; padding:8px; display:none;
-    }
-    .mobile-menu.show { display:block; }
-    .mobile-menu a { display:block; padding:8px 10px; color:#083b73; text-decoration:none; border-radius:6px; }
-    .mobile-menu a:hover { background:rgba(3,59,130,0.06); }
-
-    .top-nav {
-      background:#003b82;
-      color:white;
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-    }
-
-    .top-nav .mobile-username { color: #fff; font-weight:700; margin-left:8px; font-size:14px; }
-
-    .summary-bar {
-      background:#003b82;
-      color:white;
-      padding:12px 16px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-    }
-
-    .summary-item { flex:1; min-width:120px; }
-    .summary-title { font-size:13px; opacity:0.8; }
-    .summary-value { font-size:14px; font-weight:600; }
-
-    .month-box {
-      background:#002e66;
-      padding:12px 16px;
-      border-radius:6px;
-      color:white;
-      font-weight:500;
-      margin-bottom:10px;
-    }
-
-    .tx-card {
-      padding:12px;
-      border-bottom:1px solid #e6e6e6;
-    }
-
-    .tx-icon {
-      width:40px; height:40px; border-radius:50%;
-      display:flex; align-items:center; justify-content:center;
-      background:#eef3ff; color:#003b82; font-size:20px;
-    }
-
-    .fab-btn {
-      width:55px; height:55px;
-      border-radius:50%;
-      position:fixed;
-      bottom:25px; right:25px;
-      background:#0056d2;
-      color:white;
-      font-size:30px;
-      display:flex; align-items:center; justify-content:center;
-      border:none;
-      box-shadow:0 4px 10px rgba(0,0,0,0.25);
-    }
-
-    @media(min-width:992px){
-      .container-dashboard { max-width:900px; margin:auto; }
-      .fab-btn { bottom:40px; right:40px; }
-    }
-      #fabMenu {
-        position: absolute;
-        right: 0;
-        bottom: 70px;
-        background: #ffffff;
-        padding: 8px;
-        border-radius: 10px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        min-width: 150px;
-        transform-origin: bottom right;
-        transition: transform .18s ease, opacity .18s ease;
-        opacity: 0;
-        transform: translateY(8px) scale(0.98);
-        z-index: 1000;
-      }
-
-      /* visible state */
-      .fab-menu-show {
-        opacity: 1 !important;
-        transform: translateY(0) scale(1) !important;
-      }
-
-      /* menu buttons inside */
-      .fab-menu-btn {
-        text-align: left;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 8px 12px;
-      }
-
-      /* transparent, attractive action buttons inside the FAB menu */
-      .fab-action {
-        background: transparent;
-        border: 1px solid rgba(3,59,130,0.06);
-        color: #083b73;
-        padding: 8px 12px;
-        border-radius: 999px;
-        display:flex;
-        align-items:center;
-        gap:10px;
-        min-width:140px;
-        transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
-        backdrop-filter: blur(4px);
-      }
-      .fab-action .dot { width:28px; height:28px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:16px; }
-      .fab-action.income { color:#0f7a4d; border-color: rgba(15,122,77,0.09); }
-      .fab-action.income .dot { background: linear-gradient(135deg,#c8f7df,#8be7b9); color:#065a3b; box-shadow: 0 6px 18px rgba(15,122,77,0.08); }
-      .fab-action.expense { color:#b32525; border-color: rgba(179,37,37,0.09); }
-      .fab-action.expense .dot { background: linear-gradient(135deg,#ffd6d6,#ffb3b3); color:#7a1b1b; box-shadow: 0 6px 18px rgba(179,37,37,0.06); }
-      .fab-action:hover { transform: translateY(-4px); box-shadow:0 12px 26px rgba(3,59,130,0.08); background: rgba(0,0,0,0.02); }
-      /* unified summary row */
-      .summary-row {
-        background: #003b82;
-        color: white;
-        padding: 12px 14px;
-        border-radius: 8px;
-        box-shadow: 0 6px 18px rgba(0,59,130,0.12);
-      }
-
-      .summary-row .summary-item { min-width:120px; }
-      .summary-row .summary-title { font-size:12px; opacity:0.85; }
-      .summary-row .summary-value { font-size:15px; font-weight:700; }
-
-      @media (max-width: 575px) {
-        /* container padding to avoid edge-to-edge */
-        .container-dashboard { padding-left:12px; padding-right:12px; }
-
-        .summary-row { flex-direction: column; align-items:stretch; gap:10px; padding:10px; }
-        /* month row stays at top, spaced nicely */
-        .summary-row > .d-flex.align-items-center { width:100%; justify-content:space-between; }
-
-        /* stack summary items vertically for clarity */
-        .summary-row > .d-flex.gap-3 { width:100%; flex-direction:column; gap:8px; }
-        .summary-row .summary-item {
-          flex: none;
-          width: 100%;
-          max-width: 100%;
-          text-align: left;
-          background: rgba(255,255,255,0.06);
-          padding:10px 12px;
-          border-radius:8px;
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-        }
-        .summary-row .summary-title { font-size:12px; opacity:0.9; }
-        .summary-row .summary-value { font-size:16px; font-weight:700; }
-      }
-    /* make sure on small desktops the layout remains fluid and not clipped */
-      @media (min-width: 576px) and (max-width: 991px) {
-        .container-dashboard { padding-left: 18px; padding-right:18px; }
-      }
-    /* layout helpers: keep sidebar fixed, center content area inside available space */
-    .main { padding-left: 0; }
-    .content-inner { max-width: 900px; margin: 12px auto; padding: 0 12px; }
-    @media(min-width:768px){ .main { padding-left: 220px; } }
-  </style>
-</head>
-<body>
-
-  <!-- Left Sidebar -->
-  <aside class="app-sidebar">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>eTrack — Dashboard</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../asset/css/styles.css" />
+    <link rel="stylesheet" href="../asset/css/dashboard.css" />
+  </head>
+  <body>
+    <!-- Left Sidebar -->
+    <aside class="app-sidebar">
       <div class="brand">
-        <img src="../asset/img/logo.png" alt="eTrack logo" class="brand-logo">
-        <div id="sidebarUser" style="text-align:center;margin-top:4px;">
-          <div id="sidebarUserName" style="font-weight:700;font-size:14px;line-height:1;">User</div>
+        <img src="../asset/img/logo.png" alt="eTrack logo" class="brand-logo" />
+        <div id="sidebarUser" style="text-align: center; margin-top: 4px">
+          <div
+            id="sidebarUserName"
+            style="font-weight: 700; font-size: 14px; line-height: 1"
+          >
+            User
+          </div>
         </div>
       </div>
-    <nav class="nav-list">
-      <a href="dashboard.html" class="nav-link">Dashboard</a>
-      <a href="report.html" class="nav-link">Report</a>
-      <a href="goals.html" class="nav-link">Goals</a>
-      <a href="../index.html" class="nav-link logout">Log out</a>
-    </nav>
-  </aside>
+      <nav class="nav-list">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="report.html" class="nav-link">Report</a>
+        <a href="goals.html" class="nav-link">Goals</a>
+        <a href="../index.html" class="nav-link logout">Log out</a>
+      </nav>
+    </aside>
 
-  <!-- mobile overlay (opened by navbar menu button) -->
-  <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
-  <!-- mobile small menu + overlay (used on small screens) -->
-  <div id="mobileMenuOverlay" class="mobile-menu-overlay" aria-hidden="true"></div>
-  <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="#">Report</a>
-    <a href="#">Goals</a>
-    <a href="#" class="logout">Log out</a>
-  </div>
-
-  <!-- Top Navigation -->
-  <div class="top-nav">
-    <div class="d-flex align-items-center gap-2">
-      <img src="../asset/img/logo.png" style="height:34px;">
-      <span id="mobileUserName" class="mobile-username">User</span>
+    <!-- mobile overlay (opened by navbar menu button) -->
+    <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+    <!-- mobile small menu + overlay (used on small screens) -->
+    <div
+      id="mobileMenuOverlay"
+      class="mobile-menu-overlay"
+      aria-hidden="true"
+    ></div>
+    <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="#">Report</a>
+      <a href="#">Goals</a>
+      <a href="#" class="logout">Log out</a>
     </div>
-    <button id="navMenuBtn" class="btn text-white"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/></svg></button>
-  </div>
+
+    <!-- Top Navigation -->
+    <div class="top-nav">
+      <div class="d-flex align-items-center gap-2">
+        <img src="../asset/img/logo.png" style="height: 34px" />
+        <span id="mobileUserName" class="mobile-username">User</span>
+      </div>
+      <button id="navMenuBtn" class="btn text-white">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          fill="currentColor"
+          class="bi bi-list"
+          viewBox="0 0 16 16"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"
+          />
+        </svg>
+      </button>
+    </div>
 
     <div class="main">
-    <div class="container-dashboard content-inner">
+      <div class="container-dashboard content-inner">
+        <script>
+          // populate sidebar user name from localStorage
+          (function () {
+            const name = localStorage.getItem("etrack_user_name") || "User";
+            const elName = document.getElementById("sidebarUserName");
+            if (elName) elName.textContent = name;
+            const mobileEl = document.getElementById("mobileUserName");
+            if (mobileEl) mobileEl.textContent = name;
+          })();
+        </script>
 
-  <script>
-    // populate sidebar user name from localStorage
-    (function(){
-      const name = localStorage.getItem('etrack_user_name') || 'User';
-      const elName = document.getElementById('sidebarUserName');
-      if(elName) elName.textContent = name;
-      const mobileEl = document.getElementById('mobileUserName');
-      if(mobileEl) mobileEl.textContent = name;
-    })();
-  </script>
+        <!-- Page header -->
+        <div
+          class="page-header d-flex align-items-center justify-content-between mt-3 mb-2"
+        >
+          <div>
+            <h1 class="mb-0">Dashboard</h1>
+            <div class="text-muted small">
+              Overview of your income, expenses and balance
+            </div>
+          </div>
+        </div>
 
-    <!-- Page header -->
-    <div class="page-header d-flex align-items-center justify-content-between mt-3 mb-2">
-      <div>
-        <h1 class="h4 mb-0">Dashboard</h1>
-        <div class="text-muted small">Overview of your income, expenses and balance</div>
+        <!-- Unified Month + Summary (single colored bar) -->
+        <div
+          class="summary-row d-flex align-items-center justify-content-between mt-3"
+        >
+          <div class="d-flex align-items-center gap-2">
+            <button id="prevMonth" class="btn btn-sm btn-light">◀</button>
+            <div id="monthLabel" class="fw-semibold">March 2025</div>
+            <button id="nextMonth" class="btn btn-sm btn-light">▶</button>
+          </div>
+
+          <div class="d-flex gap-3 align-items-center">
+            <div class="summary-item text-end">
+              <div class="summary-title">Income</div>
+              <div id="incomeValue" class="summary-value">Rp 0</div>
+            </div>
+
+            <div class="summary-item text-end">
+              <div class="summary-title">Expenses</div>
+              <div id="expensesValue" class="summary-value">Rp 0</div>
+            </div>
+
+            <div class="summary-item text-end">
+              <div class="summary-title">Balance</div>
+              <div id="balanceValue" class="summary-value">Rp 0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transactions (populated from backend) -->
+        <div id="transactionsList" class="mt-2"></div>
       </div>
     </div>
 
-    <!-- Unified Month + Summary (single colored bar) -->
-    <div class="summary-row d-flex align-items-center justify-content-between mt-3">
-      <div class="d-flex align-items-center gap-2">
-        <button id="prevMonth" class="btn btn-sm btn-light">◀</button>
-        <div id="monthLabel" class="fw-semibold">March 2025</div>
-        <button id="nextMonth" class="btn btn-sm btn-light">▶</button>
+    <!-- Floating Add Button -->
+    <!-- Floating Add Button (single, with menu) -->
+    <div class="position-fixed" style="bottom: 20px; right: 20px; z-index: 999">
+      <!-- Hidden menu (placed above the button) -->
+      <div id="fabMenu" class="" aria-hidden="true">
+        <button id="fabIncome" class="fab-action income">
+          <span class="dot">💰</span> <span>Income</span>
+        </button>
+        <button id="fabExpense" class="fab-action expense">
+          <span class="dot">🧾</span> <span>Expense</span>
+        </button>
       </div>
 
-      <div class="d-flex gap-3 align-items-center">
-        <div class="summary-item text-end">
-          <div class="summary-title">Income</div>
-          <div id="incomeValue" class="summary-value">Rp 0</div>
-        </div>
-
-        <div class="summary-item text-end">
-          <div class="summary-title">Expenses</div>
-          <div id="expensesValue" class="summary-value">Rp 0</div>
-        </div>
-
-        <div class="summary-item text-end">
-          <div class="summary-title">Balance</div>
-          <div id="balanceValue" class="summary-value">Rp 0</div>
-        </div>
-      </div>
+      <button
+        id="fabBtn"
+        class="fab-menu-plus btn rounded-circle"
+        aria-controls="fabMenu"
+        aria-expanded="false"
+        style="
+          width: 55px;
+          height: 55px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 28px;
+        "
+      >
+        +
+      </button>
     </div>
 
-    <!-- Transactions (populated from backend) -->
-    <div id="transactionsList" class="mt-2"></div>
+    <script>
+      const fabBtn = document.getElementById("fabBtn");
+      const fabMenu = document.getElementById("fabMenu");
 
-    </div>
-  </div>
-
-  <!-- Floating Add Button -->
-  <!-- Floating Add Button (single, with menu) -->
-  <div class="position-fixed" style="bottom: 20px; right: 20px; z-index: 999;">
-    <!-- Hidden menu (placed above the button) -->
-    <div id="fabMenu" class="" aria-hidden="true">
-      <button id="fabIncome" class="fab-action income"> <span class="dot">💰</span> <span>Income</span></button>
-      <button id="fabExpense" class="fab-action expense"> <span class="dot">🧾</span> <span>Expense</span></button>
-    </div>
-
-    <button id="fabBtn" class="btn btn-primary rounded-circle" aria-controls="fabMenu" aria-expanded="false" style="width: 55px; height: 55px; display:flex; align-items:center; justify-content:center; font-size:28px;">+</button>
-  </div>
-
-  <script>
-    const fabBtn = document.getElementById('fabBtn');
-    const fabMenu = document.getElementById('fabMenu');
-
-    function openFabMenu() {
-      fabMenu.classList.add('fab-menu-show');
-      fabMenu.setAttribute('aria-hidden', 'false');
-      fabBtn.setAttribute('aria-expanded', 'true');
-    }
-
-    function closeFabMenu() {
-      fabMenu.classList.remove('fab-menu-show');
-      fabMenu.setAttribute('aria-hidden', 'true');
-      fabBtn.setAttribute('aria-expanded', 'false');
-    }
-
-    function toggleFabMenu() {
-      if (fabMenu.classList.contains('fab-menu-show')) closeFabMenu(); else openFabMenu();
-    }
-
-    fabBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleFabMenu();
-    });
-
-    // close when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!fabMenu.contains(e.target) && e.target !== fabBtn) {
-        closeFabMenu();
+      function openFabMenu() {
+        fabMenu.classList.add("fab-menu-show");
+        fabMenu.setAttribute("aria-hidden", "false");
+        fabBtn.setAttribute("aria-expanded", "true");
       }
-    });
 
-    // close with Escape
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeFabMenu();
-    });
-
-    // stop clicks inside menu from closing when interacting with buttons
-    fabMenu.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const btn = e.target.closest('button');
-      if (!btn) return;
-      if (btn.id === 'fabIncome') {
-        // navigate to income page
-        window.location.href = 'income.html';
-        return;
+      function closeFabMenu() {
+        fabMenu.classList.remove("fab-menu-show");
+        fabMenu.setAttribute("aria-hidden", "true");
+        fabBtn.setAttribute("aria-expanded", "false");
       }
-      if (btn.id === 'fabExpense') {
-        // navigate to expense page
-        window.location.href = 'expense.html';
-        return;
+
+      function toggleFabMenu() {
+        if (fabMenu.classList.contains("fab-menu-show")) closeFabMenu();
+        else openFabMenu();
       }
-      closeFabMenu();
-    });
 
-    // Sidebar toggle for mobile
-  const sidebar = document.querySelector('.app-sidebar');
-  const navMenuBtn = document.getElementById('navMenuBtn');
-  const sidebarOverlay = document.getElementById('sidebarOverlay');
-  const mobileMenu = document.getElementById('mobileMenu');
-  const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
-
-    function openSidebar() {
-      sidebar.classList.add('open');
-      sidebarOverlay.classList.add('show');
-      sidebarOverlay.setAttribute('aria-hidden', 'false');
-    }
-    function closeSidebar() {
-      sidebar.classList.remove('open');
-      sidebarOverlay.classList.remove('show');
-      sidebarOverlay.setAttribute('aria-hidden', 'true');
-    }
-
-    navMenuBtn && navMenuBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      // on small screens show small mobile menu instead of full sidebar
-      if (window.innerWidth <= 767) {
-        const isOpen = mobileMenu.classList.contains('show');
-        if (isOpen) {
-          mobileMenu.classList.remove('show');
-          mobileMenuOverlay.classList.remove('show');
-          mobileMenu.setAttribute('aria-hidden', 'true');
-          mobileMenuOverlay.setAttribute('aria-hidden', 'true');
-        } else {
-          mobileMenu.classList.add('show');
-          mobileMenuOverlay.classList.add('show');
-          mobileMenu.setAttribute('aria-hidden', 'false');
-          mobileMenuOverlay.setAttribute('aria-hidden', 'false');
-        }
-        return;
-      }
-      openSidebar();
-    });
-
-    sidebarOverlay && sidebarOverlay.addEventListener('click', () => closeSidebar());
-    // mobile small menu overlay close
-    mobileMenuOverlay && mobileMenuOverlay.addEventListener('click', () => {
-      mobileMenu.classList.remove('show');
-      mobileMenuOverlay.classList.remove('show');
-      mobileMenu.setAttribute('aria-hidden','true');
-      mobileMenuOverlay.setAttribute('aria-hidden','true');
-    });
-
-    // close mobile menu when selecting one of its links
-    document.querySelectorAll('#mobileMenu a').forEach(a => {
-      a.addEventListener('click', () => {
-        mobileMenu.classList.remove('show');
-        mobileMenuOverlay.classList.remove('show');
-        mobileMenu.setAttribute('aria-hidden','true');
-        mobileMenuOverlay.setAttribute('aria-hidden','true');
+      fabBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleFabMenu();
       });
-    });
 
-    // close sidebar when a nav link is clicked (mobile)
-    document.querySelectorAll('.app-sidebar .nav-link').forEach(a => {
-      a.addEventListener('click', () => closeSidebar());
-    });
-  </script>
-  <script>
-    // Fetch recent transactions and monthly summary from backend and render
-    (function(){
-      const API_BASE = 'http://localhost:3000';
-      const userId = Number(localStorage.getItem('etrack_user_id') || 1);
+      // close when clicking outside
+      document.addEventListener("click", (e) => {
+        if (!fabMenu.contains(e.target) && e.target !== fabBtn) {
+          closeFabMenu();
+        }
+      });
 
-      function formatCurrency(v){
-        try{ return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(v); }catch(e){ return 'Rp '+v; }
+      // close with Escape
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeFabMenu();
+      });
+
+      // stop clicks inside menu from closing when interacting with buttons
+      fabMenu.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const btn = e.target.closest("button");
+        if (!btn) return;
+        if (btn.id === "fabIncome") {
+          // navigate to income page
+          window.location.href = "income.html";
+          return;
+        }
+        if (btn.id === "fabExpense") {
+          // navigate to expense page
+          window.location.href = "expense.html";
+          return;
+        }
+        closeFabMenu();
+      });
+
+      // Sidebar toggle for mobile
+      const sidebar = document.querySelector(".app-sidebar");
+      const navMenuBtn = document.getElementById("navMenuBtn");
+      const sidebarOverlay = document.getElementById("sidebarOverlay");
+      const mobileMenu = document.getElementById("mobileMenu");
+      const mobileMenuOverlay = document.getElementById("mobileMenuOverlay");
+
+      function openSidebar() {
+        sidebar.classList.add("open");
+        sidebarOverlay.classList.add("show");
+        sidebarOverlay.setAttribute("aria-hidden", "false");
+      }
+      function closeSidebar() {
+        sidebar.classList.remove("open");
+        sidebarOverlay.classList.remove("show");
+        sidebarOverlay.setAttribute("aria-hidden", "true");
       }
 
-      // selectedMonth: Date pointing to first day of selected month
-      let selectedMonth = new Date();
-      selectedMonth.setDate(1);
-
-      const monthLabel = document.getElementById('monthLabel');
-      const prevBtn = document.getElementById('prevMonth');
-      const nextBtn = document.getElementById('nextMonth');
-
-      function toYMD(d){ return d.toISOString().slice(0,10); }
-      function startOfMonth(d){ const y=d.getFullYear(), m=d.getMonth(); return new Date(y,m,1); }
-      function endOfMonth(d){ const y=d.getFullYear(), m=d.getMonth(); return new Date(y,m+1,0); }
-      function formatMonthLabel(d){ return d.toLocaleString('id-ID', { month:'long', year:'numeric' }); }
-
-      async function loadForMonth(){
-        if(monthLabel) monthLabel.textContent = formatMonthLabel(selectedMonth);
-        const start = toYMD(startOfMonth(selectedMonth));
-        const end = toYMD(endOfMonth(selectedMonth));
-
-        // get summary for selected month
-        try{
-          const sres = await fetch(`${API_BASE}/reports/summary?start=${start}&end=${end}&user_id=${userId}`);
-          if(sres.ok){
-            const sjson = await sres.json();
-            let income = 0, expense = 0;
-            sjson.forEach(r => {
-              // note: r.type may be backticked or different; normalize
-              const t = (r.type || '').toString().toLowerCase();
-              if(t === 'income') income += Number(r.total || 0);
-              if(t === 'expense') expense += Number(r.total || 0);
-            });
-            const balance = income - expense;
-            const incEl = document.getElementById('incomeValue'); if(incEl) incEl.textContent = formatCurrency(income);
-            const expEl = document.getElementById('expensesValue'); if(expEl) expEl.textContent = formatCurrency(expense);
-            const balEl = document.getElementById('balanceValue'); if(balEl) balEl.textContent = formatCurrency(balance);
-          }
-        }catch(err){ console.error('summary fetch error', err); }
-
-        // fetch recent transactions for the selected month
-        try{
-          const tres = await fetch(`${API_BASE}/transactions?user_id=${userId}&start=${start}&end=${end}&limit=500`);
-          if(!tres.ok) throw new Error('fail');
-          const tx = await tres.json();
-          const list = document.getElementById('transactionsList');
-          if(!list) return;
-          list.innerHTML = '';
-
-          // group by date (YYYY-MM-DD)
-          let lastDate = null;
-          tx.forEach(t => {
-            const d = t.occurred_at ? t.occurred_at.split('T')[0] : '';
-            if(d !== lastDate){
-              const dateHeader = document.createElement('div');
-              dateHeader.className = 'px-3 mt-3 small text-muted';
-              const dateObj = new Date(d + 'T00:00:00');
-              dateHeader.textContent = isNaN(dateObj.getTime()) ? d : dateObj.toLocaleDateString('id-ID', { weekday:'short', day:'2-digit', month:'long', year:'numeric' });
-              list.appendChild(dateHeader);
-              lastDate = d;
+      navMenuBtn &&
+        navMenuBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          // on small screens show small mobile menu instead of full sidebar
+          if (window.innerWidth <= 767) {
+            const isOpen = mobileMenu.classList.contains("show");
+            if (isOpen) {
+              mobileMenu.classList.remove("show");
+              mobileMenuOverlay.classList.remove("show");
+              mobileMenu.setAttribute("aria-hidden", "true");
+              mobileMenuOverlay.setAttribute("aria-hidden", "true");
+            } else {
+              mobileMenu.classList.add("show");
+              mobileMenuOverlay.classList.add("show");
+              mobileMenu.setAttribute("aria-hidden", "false");
+              mobileMenuOverlay.setAttribute("aria-hidden", "false");
             }
+            return;
+          }
+          openSidebar();
+        });
 
-            const card = document.createElement('div');
-            card.className = 'tx-card d-flex align-items-center gap-3';
-            const icon = document.createElement('div'); icon.className = 'tx-icon'; icon.textContent = '💸';
-            const title = document.createElement('div'); title.className = 'flex-grow-1'; title.innerHTML = `<div class="fw-bold">${t.category || 'Uncategorized'}</div><div class="small text-muted">${t.description || ''}</div>`;
-            const amt = document.createElement('div'); amt.className = (t.type === 'income') ? 'text-success fw-semibold' : 'text-danger fw-semibold'; amt.textContent = (t.type === 'income' ? '+ ' : '- ') + formatCurrency(Number(t.amount || 0));
-            card.appendChild(icon); card.appendChild(title); card.appendChild(amt);
-            list.appendChild(card);
+      sidebarOverlay &&
+        sidebarOverlay.addEventListener("click", () => closeSidebar());
+      // mobile small menu overlay close
+      mobileMenuOverlay &&
+        mobileMenuOverlay.addEventListener("click", () => {
+          mobileMenu.classList.remove("show");
+          mobileMenuOverlay.classList.remove("show");
+          mobileMenu.setAttribute("aria-hidden", "true");
+          mobileMenuOverlay.setAttribute("aria-hidden", "true");
+        });
+
+      // close mobile menu when selecting one of its links
+      document.querySelectorAll("#mobileMenu a").forEach((a) => {
+        a.addEventListener("click", () => {
+          mobileMenu.classList.remove("show");
+          mobileMenuOverlay.classList.remove("show");
+          mobileMenu.setAttribute("aria-hidden", "true");
+          mobileMenuOverlay.setAttribute("aria-hidden", "true");
+        });
+      });
+
+      // close sidebar when a nav link is clicked (mobile)
+      document.querySelectorAll(".app-sidebar .nav-link").forEach((a) => {
+        a.addEventListener("click", () => closeSidebar());
+      });
+    </script>
+    <script>
+      // Fetch recent transactions and monthly summary from backend and render
+      (function () {
+        const API_BASE = "http://localhost:3000";
+        const userId = Number(localStorage.getItem("etrack_user_id") || 1);
+
+        function formatCurrency(v) {
+          try {
+            return new Intl.NumberFormat("id-ID", {
+              style: "currency",
+              currency: "IDR",
+              maximumFractionDigits: 0,
+            }).format(v);
+          } catch (e) {
+            return "Rp " + v;
+          }
+        }
+
+        // selectedMonth: Date pointing to first day of selected month
+        let selectedMonth = new Date();
+        selectedMonth.setDate(1);
+
+        const monthLabel = document.getElementById("monthLabel");
+        const prevBtn = document.getElementById("prevMonth");
+        const nextBtn = document.getElementById("nextMonth");
+
+        function toYMD(d) {
+          return d.toISOString().slice(0, 10);
+        }
+        function startOfMonth(d) {
+          const y = d.getFullYear(),
+            m = d.getMonth();
+          return new Date(y, m, 1);
+        }
+        function endOfMonth(d) {
+          const y = d.getFullYear(),
+            m = d.getMonth();
+          return new Date(y, m + 1, 0);
+        }
+        function formatMonthLabel(d) {
+          return d.toLocaleString("id-ID", { month: "long", year: "numeric" });
+        }
+
+        async function loadForMonth() {
+          if (monthLabel)
+            monthLabel.textContent = formatMonthLabel(selectedMonth);
+          const start = toYMD(startOfMonth(selectedMonth));
+          const end = toYMD(endOfMonth(selectedMonth));
+
+          // get summary for selected month
+          try {
+            const sres = await fetch(
+              `${API_BASE}/reports/summary?start=${start}&end=${end}&user_id=${userId}`
+            );
+            if (sres.ok) {
+              const sjson = await sres.json();
+              let income = 0,
+                expense = 0;
+              sjson.forEach((r) => {
+                // note: r.type may be backticked or different; normalize
+                const t = (r.type || "").toString().toLowerCase();
+                if (t === "income") income += Number(r.total || 0);
+                if (t === "expense") expense += Number(r.total || 0);
+              });
+              const balance = income - expense;
+              const incEl = document.getElementById("incomeValue");
+              if (incEl) incEl.textContent = formatCurrency(income);
+              const expEl = document.getElementById("expensesValue");
+              if (expEl) expEl.textContent = formatCurrency(expense);
+              const balEl = document.getElementById("balanceValue");
+              if (balEl) balEl.textContent = formatCurrency(balance);
+            }
+          } catch (err) {
+            console.error("summary fetch error", err);
+          }
+
+          // fetch recent transactions for the selected month
+          try {
+            const tres = await fetch(
+              `${API_BASE}/transactions?user_id=${userId}&start=${start}&end=${end}&limit=500`
+            );
+            if (!tres.ok) throw new Error("fail");
+            const tx = await tres.json();
+            const list = document.getElementById("transactionsList");
+            if (!list) return;
+            list.innerHTML = "";
+
+            // group by date (YYYY-MM-DD)
+            let lastDate = null;
+            tx.forEach((t) => {
+              const d = t.occurred_at ? t.occurred_at.split("T")[0] : "";
+              if (d !== lastDate) {
+                const dateHeader = document.createElement("div");
+                dateHeader.className = "px-3 mt-3 small text-muted";
+                const dateObj = new Date(d + "T00:00:00");
+                dateHeader.textContent = isNaN(dateObj.getTime())
+                  ? d
+                  : dateObj.toLocaleDateString("id-ID", {
+                      weekday: "short",
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    });
+                list.appendChild(dateHeader);
+                lastDate = d;
+              }
+
+              const card = document.createElement("div");
+              card.className = "tx-card d-flex align-items-center gap-3";
+              const icon = document.createElement("div");
+              icon.className = "tx-icon";
+              icon.textContent = "💸";
+              const title = document.createElement("div");
+              title.className = "flex-grow-1";
+              title.innerHTML = `<div class="fw-bold">${
+                t.category || "Uncategorized"
+              }</div><div class="small text-muted">${
+                t.description || ""
+              }</div>`;
+              const amt = document.createElement("div");
+              amt.className =
+                t.type === "income"
+                  ? "text-success fw-semibold"
+                  : "text-danger fw-semibold";
+              amt.textContent =
+                (t.type === "income" ? "+ " : "- ") +
+                formatCurrency(Number(t.amount || 0));
+              card.appendChild(icon);
+              card.appendChild(title);
+              card.appendChild(amt);
+              list.appendChild(card);
+            });
+          } catch (err) {
+            console.error("transactions fetch error", err);
+          }
+        }
+
+        // wire month buttons
+        if (prevBtn)
+          prevBtn.addEventListener("click", () => {
+            selectedMonth.setMonth(selectedMonth.getMonth() - 1);
+            loadForMonth();
           });
-        }catch(err){ console.error('transactions fetch error', err); }
-      }
+        if (nextBtn)
+          nextBtn.addEventListener("click", () => {
+            selectedMonth.setMonth(selectedMonth.getMonth() + 1);
+            loadForMonth();
+          });
 
-      // wire month buttons
-      if(prevBtn) prevBtn.addEventListener('click', ()=>{ selectedMonth.setMonth(selectedMonth.getMonth()-1); loadForMonth(); });
-      if(nextBtn) nextBtn.addEventListener('click', ()=>{ selectedMonth.setMonth(selectedMonth.getMonth()+1); loadForMonth(); });
-
-      // initial load
-      loadForMonth();
-    })();
-  </script>
-</body>
+        // initial load
+        loadForMonth();
+      })();
+    </script>
+  </body>
 </html>

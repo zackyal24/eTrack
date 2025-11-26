@@ -1,110 +1,44 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Report — eTrack</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-      body { background:#ffffff; font-family:'Inter', sans-serif; }
-
-      /* Sidebar (left strip) - updated gradient and elevated */
-      .app-sidebar {
-        position:fixed;
-        left:0;
-        top:0;
-        height:100vh;
-        width:200px;
-    background: linear-gradient(180deg, #0056d2 0%, #003b82 100%);
-        padding:18px 14px;
-        box-sizing:border-box;
-        color: #ffffff;
-        box-shadow: 0 12px 36px rgba(3,59,130,0.12);
-        transition: transform .18s ease, box-shadow .18s ease;
-        z-index: 1040;
-        border-right: 1px solid rgba(255,255,255,0.04);
-      }
-
-      /* subtle lift on hover for pointer devices */
-      @media (hover: hover) and (pointer: fine) {
-        .app-sidebar:hover { transform: translateY(-6px); box-shadow: 0 20px 44px rgba(3,59,130,0.18); }
-      }
-
-    .app-sidebar .brand { display:flex; flex-direction:column; align-items:center; justify-content:center; margin-bottom:18px; padding-top:12px; gap:8px; }
-    .app-sidebar .brand img { height:56px; width:56px; object-fit:cover; border-radius:10px; box-shadow:0 8px 26px rgba(3,59,130,0.14); }
-    .app-sidebar .nav-list { margin-top:8px; display:flex; flex-direction:column; gap:12px; }
-    .app-sidebar a.nav-link { color: rgba(255,255,255,0.95); text-decoration:none; font-weight:600; padding:10px 12px; border-radius:8px; display:block; }
-    .app-sidebar a.nav-link:hover { background: rgba(255,255,255,0.06); transform: translateY(-3px); transition: all .14s ease; }
-    .app-sidebar a.nav-link.active, .app-sidebar a.nav-link.active:hover { background: rgba(255,255,255,0.12); color: #fff; }
-    .app-sidebar a.nav-link.logout { color: rgba(255,255,255,0.9); opacity:0.95; }
-    .app-sidebar { padding:22px 14px; border-top-right-radius:12px; border-bottom-right-radius:12px; }
-
-      /* mobile: hide sidebar by default and provide a small strip button */
-      @media(max-width: 767px) {
-        .app-sidebar { transform: translateX(-100%); transition: transform .22s ease; z-index:1055; }
-        .app-sidebar.open { transform: translateX(0); }
-        .sidebar-overlay { display:none; }
-        .sidebar-overlay.show { display:block; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1050; }
-      }
-
-      /* mobile small menu (anchored to navbar menu button) */
-      .mobile-menu-overlay { display:none; }
-      .mobile-menu-overlay.show { display:block; position:fixed; inset:0; background:rgba(0,0,0,0.25); z-index:1050; }
-      .mobile-menu {
-        position:fixed; top:56px; right:12px; z-index:1060;
-        background: rgba(255,255,255,0.98); backdrop-filter: blur(4px);
-        border-radius:8px; box-shadow:0 8px 20px rgba(0,0,0,0.12);
-        min-width:160px; padding:8px; display:none;
-      }
-      .mobile-menu.show { display:block; }
-      .mobile-menu a { display:block; padding:8px 10px; color:#083b73; text-decoration:none; border-radius:6px; }
-      .mobile-menu a:hover { background:rgba(3,59,130,0.06); }
-
-      /* top-nav: shown on mobile, hidden on desktop (dashboard behavior) */
-      .top-nav {
-        background:#003b82;
-        color:white;
-        padding:14px 16px;
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-      }
-
-      @media(min-width: 768px){
-        /* hide mobile top-nav on desktop to match dashboard */
-        .top-nav { display: none !important; }
-      }
-
-      /* shared report styles */
-      :root{--sidebar-width:220px;}
-  .main-content{margin-left:var(--sidebar-width);padding:64px 1rem 1.5rem;}
-      .report-controls{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap}
-      .report-tabs{display:inline-flex;background:#f6f8fa;border-radius:999px;padding:4px}
-      .report-tab{padding:.45rem .8rem;border-radius:999px;cursor:pointer;color:#495057}
-      .report-tab.active{background:#fff;box-shadow:0 4px 14px rgba(3,12,39,0.08);}
-      .report-card{background:#fff;border-radius:.75rem;padding:1rem;box-shadow:0 6px 18px rgba(3,12,39,0.06);}
-      .donut-card{box-shadow:0 8px 26px rgba(3,12,39,0.06);}
-      .donut-card canvas{display:block;margin:0 auto}
-      .total-pill{border-radius:999px;padding:.35rem .8rem;font-weight:600}
-      #incomeLegend li, #expenseLegend li{padding:.35rem 0}
-      .amount-row{display:flex;gap:1rem;align-items:baseline}
-      .amount-row .amount{font-size:1.5rem;font-weight:700}
-      .small-muted{color:#6c757d;font-size:.9rem}
-
-      @media (max-width:767px){
-        .app-sidebar{transform:translateX(-100%);transition:transform .25s ease;}
-        .app-sidebar.open{transform:translateX(0)}
-        .top-nav{left:0}
-        .main-content{margin-left:0;padding-top:76px}
-      }
-    </style>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../asset/css/styles.css" />
+    <link rel="stylesheet" href="../asset/css/report.css" />
   </head>
   <body>
     <aside class="app-sidebar" id="sidebar">
       <div class="brand">
-        <img src="../asset/img/logo.png" alt="eTrack logo" class="brand-logo" style="height:56px;width:56px;object-fit:cover;border-radius:10px;box-shadow:0 8px 26px rgba(3,59,130,0.14)">
-        <div id="sidebarUser" style="text-align:center;margin-top:4px;">
-          <div id="sidebarUserName" style="font-weight:700;font-size:14px;line-height:1;">User</div>
+        <img
+          src="../asset/img/logo.png"
+          alt="eTrack logo"
+          class="brand-logo"
+          style="
+            height: 56px;
+            width: 56px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 8px 26px rgba(3, 59, 130, 0.14);
+          "
+        />
+        <div id="sidebarUser" style="text-align: center; margin-top: 4px">
+          <div
+            id="sidebarUserName"
+            style="font-weight: 700; font-size: 14px; line-height: 1"
+          >
+            User
+          </div>
         </div>
       </div>
       <nav class="nav-list">
@@ -118,7 +52,11 @@
     <!-- mobile overlay (opened by navbar menu button) -->
     <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
     <!-- mobile small menu + overlay (used on small screens) -->
-    <div id="mobileMenuOverlay" class="mobile-menu-overlay" aria-hidden="true"></div>
+    <div
+      id="mobileMenuOverlay"
+      class="mobile-menu-overlay"
+      aria-hidden="true"
+    ></div>
     <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
       <a href="dashboard.html">Dashboard</a>
       <a href="report.html">Report</a>
@@ -129,29 +67,55 @@
     <!-- Top Navigation (mobile) - match dashboard markup -->
     <div class="top-nav">
       <div class="d-flex align-items-center gap-2">
-        <img src="../asset/img/logo.png" style="height:34px;" alt="eTrack">
+        <img src="../asset/img/logo.png" style="height: 34px" alt="eTrack" />
         <span id="mobileUserName" class="mobile-username">User</span>
       </div>
-      <button id="navMenuBtn" class="btn text-white" aria-label="Open menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/></svg></button>
+      <button id="navMenuBtn" class="btn text-white" aria-label="Open menu">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          fill="currentColor"
+          class="bi bi-list"
+          viewBox="0 0 16 16"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"
+          />
+        </svg>
+      </button>
     </div>
 
     <main class="main-content container">
-      <div class="page-header d-flex align-items-center justify-content-between mt-3 mb-2">
+      <div
+        class="page-header d-flex align-items-center justify-content-between mt-3 mb-2"
+      >
         <div>
-          <h1 class="h4 mb-0">Reports</h1>
+          <h1 class="mb-0">Reports</h1>
           <div class="text-muted small">Overview of income and expenses</div>
         </div>
       </div>
       <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="report-controls">
           <div class="report-tabs" role="tablist" aria-label="Report tabs">
-            <div class="report-tab active" data-target="incomeSection" role="tab">Income</div>
-            <div class="report-tab" data-target="expenseSection" role="tab">Expenses</div>
+            <div
+              class="report-tab active"
+              data-target="incomeSection"
+              role="tab"
+            >
+              Income
+            </div>
+            <div class="report-tab" data-target="expenseSection" role="tab">
+              Expenses
+            </div>
           </div>
           <div class="small-muted">Summary</div>
         </div>
         <div class="d-flex gap-2">
-          <button id="exportBtn" class="btn btn-outline-secondary btn-sm">Export</button>
+          <button id="exportBtn" class="btn btn-outline-secondary btn-sm">
+            Export
+          </button>
           <button class="btn btn-primary btn-sm">Customize</button>
         </div>
       </div>
@@ -168,20 +132,35 @@
             </div>
             <div id="incomeMonthLabel" class="text-end small-muted"></div>
           </div>
-          <hr/>
+          <hr />
           <div class="row g-3">
             <div class="col-12 col-md-6">
               <div class="p-3 bg-light rounded donut-card">
-                <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
-                  <div style="flex:0 0 160px;max-width:160px">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <div style="flex: 0 0 160px; max-width: 160px">
                     <canvas id="incomeDonut" width="160" height="160"></canvas>
                   </div>
-                  <div style="flex:1;min-width:140px">
+                  <div style="flex: 1; min-width: 140px">
                     <ul id="incomeLegend" class="list-unstyled mb-0"></ul>
                   </div>
                 </div>
-                <div style="display:flex;justify-content:center;margin-top:.75rem">
-                  <button class="btn btn-outline-primary btn-sm total-pill">Total&nbsp;&nbsp;Rp 0</button>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: center;
+                    margin-top: 0.75rem;
+                  "
+                >
+                  <button class="btn btn-outline-primary btn-sm total-pill">
+                    Total&nbsp;&nbsp;Rp 0
+                  </button>
                 </div>
               </div>
             </div>
@@ -213,20 +192,35 @@
             </div>
             <div id="expenseMonthLabel" class="text-end small-muted"></div>
           </div>
-          <hr/>
+          <hr />
           <div class="row g-3">
             <div class="col-12 col-md-6">
               <div class="p-3 bg-light rounded donut-card">
-                <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
-                  <div style="flex:0 0 160px;max-width:160px">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <div style="flex: 0 0 160px; max-width: 160px">
                     <canvas id="expenseDonut" width="160" height="160"></canvas>
                   </div>
-                  <div style="flex:1;min-width:140px">
+                  <div style="flex: 1; min-width: 140px">
                     <ul id="expenseLegend" class="list-unstyled mb-0"></ul>
                   </div>
                 </div>
-                <div style="display:flex;justify-content:center;margin-top:.75rem">
-                  <button class="btn btn-outline-primary btn-sm total-pill">Total&nbsp;&nbsp;Rp 0</button>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: center;
+                    margin-top: 0.75rem;
+                  "
+                >
+                  <button class="btn btn-outline-primary btn-sm total-pill">
+                    Total&nbsp;&nbsp;Rp 0
+                  </button>
                 </div>
               </div>
             </div>
@@ -247,68 +241,96 @@
       </section>
     </main>
 
-  <!-- duplicate overlay removed (sidebar overlay placed near the aside) -->
+    <!-- duplicate overlay removed (sidebar overlay placed near the aside) -->
 
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
       // Mobile menu & sidebar toggles (match dashboard behavior)
-      const navMenuBtn = document.getElementById('navMenuBtn');
-      const sidebar = document.getElementById('sidebar');
-      const sidebarOverlay = document.getElementById('sidebarOverlay');
-      const mobileMenu = document.getElementById('mobileMenu');
-      const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+      const navMenuBtn = document.getElementById("navMenuBtn");
+      const sidebar = document.getElementById("sidebar");
+      const sidebarOverlay = document.getElementById("sidebarOverlay");
+      const mobileMenu = document.getElementById("mobileMenu");
+      const mobileMenuOverlay = document.getElementById("mobileMenuOverlay");
 
       // populate sidebar and mobile username from localStorage
-      (function(){
-        const name = localStorage.getItem('etrack_user_name') || 'User';
-        const elName = document.getElementById('sidebarUserName'); if(elName) elName.textContent = name;
-        const mobileEl = document.getElementById('mobileUserName'); if(mobileEl) mobileEl.textContent = name;
+      (function () {
+        const name = localStorage.getItem("etrack_user_name") || "User";
+        const elName = document.getElementById("sidebarUserName");
+        if (elName) elName.textContent = name;
+        const mobileEl = document.getElementById("mobileUserName");
+        if (mobileEl) mobileEl.textContent = name;
       })();
 
-      navMenuBtn && navMenuBtn.addEventListener('click', ()=>{
-        // on small screens, open the small mobile menu (dashboard pattern)
-        if(window.innerWidth < 768){
-          mobileMenu && mobileMenu.classList.toggle('show');
-          mobileMenuOverlay && mobileMenuOverlay.classList.toggle('show');
-        } else {
-          // fallback: toggle sidebar open (useful for testing)
-          sidebar && sidebar.classList.toggle('open');
-          if(sidebarOverlay) sidebarOverlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
-        }
-      });
+      navMenuBtn &&
+        navMenuBtn.addEventListener("click", () => {
+          // on small screens, open the small mobile menu (dashboard pattern)
+          if (window.innerWidth < 768) {
+            mobileMenu && mobileMenu.classList.toggle("show");
+            mobileMenuOverlay && mobileMenuOverlay.classList.toggle("show");
+          } else {
+            // fallback: toggle sidebar open (useful for testing)
+            sidebar && sidebar.classList.toggle("open");
+            if (sidebarOverlay)
+              sidebarOverlay.style.display = sidebar.classList.contains("open")
+                ? "block"
+                : "none";
+          }
+        });
 
       // close overlays when clicking outside
-      mobileMenuOverlay && mobileMenuOverlay.addEventListener('click', ()=>{ mobileMenu && mobileMenu.classList.remove('show'); mobileMenuOverlay.classList.remove('show'); });
-      sidebarOverlay && sidebarOverlay.addEventListener('click', ()=>{ sidebar && sidebar.classList.remove('open'); sidebarOverlay.style.display='none'; });
+      mobileMenuOverlay &&
+        mobileMenuOverlay.addEventListener("click", () => {
+          mobileMenu && mobileMenu.classList.remove("show");
+          mobileMenuOverlay.classList.remove("show");
+        });
+      sidebarOverlay &&
+        sidebarOverlay.addEventListener("click", () => {
+          sidebar && sidebar.classList.remove("open");
+          sidebarOverlay.style.display = "none";
+        });
 
       // close mobile menu when clicking a link
-      if(mobileMenu){
-        mobileMenu.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=>{ mobileMenu.classList.remove('show'); mobileMenuOverlay.classList.remove('show'); }));
+      if (mobileMenu) {
+        mobileMenu.querySelectorAll("a").forEach((a) =>
+          a.addEventListener("click", () => {
+            mobileMenu.classList.remove("show");
+            mobileMenuOverlay.classList.remove("show");
+          })
+        );
       }
 
       // Report tabs
-      document.querySelectorAll('.report-tab').forEach(tab=>{
-        tab.addEventListener('click', ()=>{
-          document.querySelectorAll('.report-tab').forEach(t=>t.classList.remove('active'));
-          tab.classList.add('active');
-          const target = tab.getAttribute('data-target');
-          document.querySelectorAll('main section').forEach(s=>s.classList.add('d-none'));
+      document.querySelectorAll(".report-tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          document
+            .querySelectorAll(".report-tab")
+            .forEach((t) => t.classList.remove("active"));
+          tab.classList.add("active");
+          const target = tab.getAttribute("data-target");
+          document
+            .querySelectorAll("main section")
+            .forEach((s) => s.classList.add("d-none"));
           const el = document.getElementById(target);
-          el && el.classList.remove('d-none');
+          el && el.classList.remove("d-none");
         });
       });
 
       // Small helper to build a legend list
-      function buildLegend(containerId, labels, colors, values){
+      function buildLegend(containerId, labels, colors, values) {
         const ul = document.getElementById(containerId);
-        if(!ul) return;
-        ul.innerHTML = '';
-        labels.forEach((lbl,i)=>{
-          const pct = values[i] ? Math.round((values[i]/values.reduce((a,b)=>a+b,0))*100) : 0;
-          const li = document.createElement('li');
-          li.style.display = 'flex'; li.style.justifyContent = 'space-between'; li.style.alignItems='center'; li.style.padding='6px 0';
+        if (!ul) return;
+        ul.innerHTML = "";
+        labels.forEach((lbl, i) => {
+          const pct = values[i]
+            ? Math.round((values[i] / values.reduce((a, b) => a + b, 0)) * 100)
+            : 0;
+          const li = document.createElement("li");
+          li.style.display = "flex";
+          li.style.justifyContent = "space-between";
+          li.style.alignItems = "center";
+          li.style.padding = "6px 0";
           li.innerHTML = `<div style=\"display:flex;align-items:center;gap:.6rem\"><span style=\"width:12px;height:12px;border-radius:50%;background:${colors[i]};display:inline-block\"></span><span>${lbl}</span></div><div style=\"color:#6c757d\">${pct}%</div>`;
           ul.appendChild(li);
         });
@@ -318,220 +340,346 @@
       let incomeChart = null;
       let expenseChart = null;
 
-      function formatCurrency(v){
-        try{ return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(v); }catch(e){ return 'Rp '+v; }
+      function formatCurrency(v) {
+        try {
+          return new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
+            maximumFractionDigits: 0,
+          }).format(v);
+        } catch (e) {
+          return "Rp " + v;
+        }
       }
 
       // Use backend on localhost if file:// protocol (helps when opening HTML directly)
-      const API_BASE = (location.protocol === 'file:') ? 'http://localhost:3000' : '';
+      const API_BASE =
+        location.protocol === "file:" ? "http://localhost:3000" : "";
 
-      async function getDonutData(type){
-        const month = new Date().toISOString().slice(0,7); // YYYY-MM
-        const userId = Number(localStorage.getItem('etrack_user_id') || 1);
-        const url = `${API_BASE}/reports/donut?type=${encodeURIComponent(type)}&month=${encodeURIComponent(month)}&user_id=${encodeURIComponent(userId)}`;
-        try{
+      async function getDonutData(type) {
+        const month = new Date().toISOString().slice(0, 7); // YYYY-MM
+        const userId = Number(localStorage.getItem("etrack_user_id") || 1);
+        const url = `${API_BASE}/reports/donut?type=${encodeURIComponent(
+          type
+        )}&month=${encodeURIComponent(month)}&user_id=${encodeURIComponent(
+          userId
+        )}`;
+        try {
           const res = await fetch(url);
-          if(!res.ok) throw new Error('network');
+          if (!res.ok) throw new Error("network");
           const json = await res.json();
           return json;
-        }catch(err){
-          console.error('Failed to fetch donut data', err);
+        } catch (err) {
+          console.error("Failed to fetch donut data", err);
           return null;
         }
       }
 
-      function renderDonut(canvasId, legendId, totalBtnSelector, data, colors){
+      function renderDonut(canvasId, legendId, totalBtnSelector, data, colors) {
         const ctxEl = document.getElementById(canvasId);
-        if(!ctxEl) return null;
-        const labels = data.map(r=>r.category);
-        const values = data.map(r=>Number(r.total));
+        if (!ctxEl) return null;
+        const labels = data.map((r) => r.category);
+        const values = data.map((r) => Number(r.total));
         buildLegend(legendId, labels, colors, values);
         // update total pill
-        const total = values.reduce((a,b)=>a+b,0);
+        const total = values.reduce((a, b) => a + b, 0);
         const totalBtn = document.querySelector(totalBtnSelector);
-        if(totalBtn) totalBtn.innerHTML = `Total&nbsp;&nbsp;${formatCurrency(total)}`;
+        if (totalBtn)
+          totalBtn.innerHTML = `Total&nbsp;&nbsp;${formatCurrency(total)}`;
 
         // destroy existing chart if present
-        if(canvasId === 'incomeDonut' && incomeChart) { incomeChart.destroy(); incomeChart = null; }
-        if(canvasId === 'expenseDonut' && expenseChart) { expenseChart.destroy(); expenseChart = null; }
+        if (canvasId === "incomeDonut" && incomeChart) {
+          incomeChart.destroy();
+          incomeChart = null;
+        }
+        if (canvasId === "expenseDonut" && expenseChart) {
+          expenseChart.destroy();
+          expenseChart = null;
+        }
 
-        const ctx = ctxEl.getContext('2d');
+        const ctx = ctxEl.getContext("2d");
         const cfg = {
-          type: 'doughnut',
-          data: { labels, datasets:[{ data: values, backgroundColor: colors, hoverOffset:6 }] },
-          options: { cutout:'70%', plugins:{legend:{display:false}}, responsive:true, maintainAspectRatio:true }
+          type: "doughnut",
+          data: {
+            labels,
+            datasets: [
+              { data: values, backgroundColor: colors, hoverOffset: 6 },
+            ],
+          },
+          options: {
+            cutout: "70%",
+            plugins: { legend: { display: false } },
+            responsive: true,
+            maintainAspectRatio: true,
+          },
         };
         const chart = new Chart(ctx, cfg);
-        if(canvasId === 'incomeDonut') incomeChart = chart;
-        if(canvasId === 'expenseDonut') expenseChart = chart;
+        if (canvasId === "incomeDonut") incomeChart = chart;
+        if (canvasId === "expenseDonut") expenseChart = chart;
         return chart;
       }
 
       // Helper to show empty state in legend area
-      function showNoData(legendId, totalBtnSelector){
+      function showNoData(legendId, totalBtnSelector) {
         const ul = document.getElementById(legendId);
-        if(ul) ul.innerHTML = '<li class="text-muted small">No data for selected month</li>';
+        if (ul)
+          ul.innerHTML =
+            '<li class="text-muted small">No data for selected month</li>';
         const totalBtn = document.querySelector(totalBtnSelector);
-        if(totalBtn) totalBtn.innerHTML = `Total&nbsp;&nbsp;${formatCurrency(0)}`;
+        if (totalBtn)
+          totalBtn.innerHTML = `Total&nbsp;&nbsp;${formatCurrency(0)}`;
       }
 
       // Initialize Income chart on load
-      (async function initIncome(){
-        const data = await getDonutData('income');
-        if(!Array.isArray(data)) { showNoData('incomeLegend', '#incomeSection .total-pill'); return; }
-        if(data.length === 0) { showNoData('incomeLegend', '#incomeSection .total-pill'); return; }
-        const colors = ['#0d6efd','#198754','#0dcaf0','#6f42c1','#ffc107','#6c757d'];
-        renderDonut('incomeDonut','incomeLegend','#incomeSection .total-pill', data, colors);
+      (async function initIncome() {
+        const data = await getDonutData("income");
+        if (!Array.isArray(data)) {
+          showNoData("incomeLegend", "#incomeSection .total-pill");
+          return;
+        }
+        if (data.length === 0) {
+          showNoData("incomeLegend", "#incomeSection .total-pill");
+          return;
+        }
+        const colors = [
+          "#0d6efd",
+          "#198754",
+          "#0dcaf0",
+          "#6f42c1",
+          "#ffc107",
+          "#6c757d",
+        ];
+        renderDonut(
+          "incomeDonut",
+          "incomeLegend",
+          "#incomeSection .total-pill",
+          data,
+          colors
+        );
         // render category list for income
-        renderCategoryList('incomeCategoryList', data);
+        renderCategoryList("incomeCategoryList", data);
         // update the big total amount display
-        const incomeTotal = data.reduce((s,r)=>s+Number(r.total),0);
-        const incomeMain = document.getElementById('incomeMainAmount') || document.querySelector('#incomeSection .amount');
-        if(incomeMain) incomeMain.textContent = formatCurrency(incomeTotal);
+        const incomeTotal = data.reduce((s, r) => s + Number(r.total), 0);
+        const incomeMain =
+          document.getElementById("incomeMainAmount") ||
+          document.querySelector("#incomeSection .amount");
+        if (incomeMain) incomeMain.textContent = formatCurrency(incomeTotal);
         // set month label
-        const monthLabelEl = document.getElementById('incomeMonthLabel');
-        try{ const md = new Date(new Date().toISOString().slice(0,7) + '-01'); if(monthLabelEl) monthLabelEl.textContent = md.toLocaleString('id-ID',{month:'long', year:'numeric'}); }catch(e){}
+        const monthLabelEl = document.getElementById("incomeMonthLabel");
+        try {
+          const md = new Date(new Date().toISOString().slice(0, 7) + "-01");
+          if (monthLabelEl)
+            monthLabelEl.textContent = md.toLocaleString("id-ID", {
+              month: "long",
+              year: "numeric",
+            });
+        } catch (e) {}
         // load recent transactions to populate Recent Income/Expenses
         await loadRecentTransactions();
       })();
 
       // Expense chart: render on-demand when the Expenses tab is shown
-      async function ensureExpenseChart(){
-        if(expenseChart) return;
-        const data = await getDonutData('expense');
-        if(data === null) { showNoData('expenseLegend', '#expenseSection .total-pill'); return; }
-        if(data.length === 0) { showNoData('expenseLegend', '#expenseSection .total-pill'); return; }
-        const colors = ['#0d6efd','#ffc107','#198754','#6c757d','#fd7e14'];
-        renderDonut('expenseDonut','expenseLegend','#expenseSection .total-pill', data, colors);
-        renderCategoryList('expenseCategoryList', data);
-        const expenseTotal = data.reduce((s,r)=>s+Number(r.total),0);
-        const expenseMain = document.getElementById('expenseMainAmount') || document.querySelector('#expenseSection .amount');
-        if(expenseMain) expenseMain.textContent = formatCurrency(expenseTotal);
-        const expenseMonthEl = document.getElementById('expenseMonthLabel');
-        try{ const md = new Date(new Date().toISOString().slice(0,7) + '-01'); if(expenseMonthEl) expenseMonthEl.textContent = md.toLocaleString('id-ID',{month:'long', year:'numeric'}); }catch(e){}
+      async function ensureExpenseChart() {
+        if (expenseChart) return;
+        const data = await getDonutData("expense");
+        if (data === null) {
+          showNoData("expenseLegend", "#expenseSection .total-pill");
+          return;
+        }
+        if (data.length === 0) {
+          showNoData("expenseLegend", "#expenseSection .total-pill");
+          return;
+        }
+        const colors = ["#0d6efd", "#ffc107", "#198754", "#6c757d", "#fd7e14"];
+        renderDonut(
+          "expenseDonut",
+          "expenseLegend",
+          "#expenseSection .total-pill",
+          data,
+          colors
+        );
+        renderCategoryList("expenseCategoryList", data);
+        const expenseTotal = data.reduce((s, r) => s + Number(r.total), 0);
+        const expenseMain =
+          document.getElementById("expenseMainAmount") ||
+          document.querySelector("#expenseSection .amount");
+        if (expenseMain) expenseMain.textContent = formatCurrency(expenseTotal);
+        const expenseMonthEl = document.getElementById("expenseMonthLabel");
+        try {
+          const md = new Date(new Date().toISOString().slice(0, 7) + "-01");
+          if (expenseMonthEl)
+            expenseMonthEl.textContent = md.toLocaleString("id-ID", {
+              month: "long",
+              year: "numeric",
+            });
+        } catch (e) {}
         await loadRecentTransactions();
       }
 
       // Update tab click handler to create expense chart on-demand
-      document.querySelectorAll('.report-tab').forEach(tab=>{
-        tab.addEventListener('click', async ()=>{
-          document.querySelectorAll('.report-tab').forEach(t=>t.classList.remove('active'));
-          tab.classList.add('active');
-          const target = tab.getAttribute('data-target');
-          document.querySelectorAll('main section').forEach(s=>s.classList.add('d-none'));
+      document.querySelectorAll(".report-tab").forEach((tab) => {
+        tab.addEventListener("click", async () => {
+          document
+            .querySelectorAll(".report-tab")
+            .forEach((t) => t.classList.remove("active"));
+          tab.classList.add("active");
+          const target = tab.getAttribute("data-target");
+          document
+            .querySelectorAll("main section")
+            .forEach((s) => s.classList.add("d-none"));
           const el = document.getElementById(target);
-          el && el.classList.remove('d-none');
-          if(target === 'expenseSection'){
+          el && el.classList.remove("d-none");
+          if (target === "expenseSection") {
             await ensureExpenseChart();
           }
         });
       });
 
       // Fetch recent transactions and render Recent Income/Expenses
-      async function fetchRecentTransactions(limit = 10){
-        const userId = Number(localStorage.getItem('etrack_user_id') || 1);
-        const url = `${API_BASE}/transactions?user_id=${encodeURIComponent(userId)}&limit=${encodeURIComponent(limit)}`;
-        try{
+      async function fetchRecentTransactions(limit = 10) {
+        const userId = Number(localStorage.getItem("etrack_user_id") || 1);
+        const url = `${API_BASE}/transactions?user_id=${encodeURIComponent(
+          userId
+        )}&limit=${encodeURIComponent(limit)}`;
+        try {
           const res = await fetch(url);
-          if(!res.ok) throw new Error('network');
+          if (!res.ok) throw new Error("network");
           const json = await res.json();
           return json;
-        }catch(e){ console.error('Failed to fetch recent transactions', e); return []; }
+        } catch (e) {
+          console.error("Failed to fetch recent transactions", e);
+          return [];
+        }
       }
 
-      async function loadRecentTransactions(){
+      async function loadRecentTransactions() {
         const rows = await fetchRecentTransactions(20);
-        const incomeList = document.getElementById('recentIncomeList');
-        const expenseList = document.getElementById('recentExpenseList');
-        if(incomeList) incomeList.innerHTML = '';
-        if(expenseList) expenseList.innerHTML = '';
+        const incomeList = document.getElementById("recentIncomeList");
+        const expenseList = document.getElementById("recentExpenseList");
+        if (incomeList) incomeList.innerHTML = "";
+        if (expenseList) expenseList.innerHTML = "";
 
-        const incomeRows = rows.filter(r=>String(r.type).toLowerCase() === 'income');
-        const expenseRows = rows.filter(r=>String(r.type).toLowerCase() === 'expense');
+        const incomeRows = rows.filter(
+          (r) => String(r.type).toLowerCase() === "income"
+        );
+        const expenseRows = rows.filter(
+          (r) => String(r.type).toLowerCase() === "expense"
+        );
 
         const renderItem = (r, type) => {
-          const li = document.createElement('li');
-          li.className = 'list-group-item d-flex justify-content-between align-items-center';
-          const left = document.createElement('div');
-          left.textContent = r.description || r.category || ('Tx ' + r.id);
-          const badge = document.createElement('span');
-          badge.className = (type === 'income' ? 'badge bg-success' : 'badge bg-danger');
+          const li = document.createElement("li");
+          li.className =
+            "list-group-item d-flex justify-content-between align-items-center";
+          const left = document.createElement("div");
+          left.textContent = r.description || r.category || "Tx " + r.id;
+          const badge = document.createElement("span");
+          badge.className =
+            type === "income" ? "badge bg-success" : "badge bg-danger";
           badge.textContent = formatCurrency(Number(r.amount || 0));
           li.appendChild(left);
           li.appendChild(badge);
           return li;
         };
 
-        if(incomeRows.length === 0){
-          if(incomeList) incomeList.innerHTML = '<li class="list-group-item text-muted">No recent income</li>';
+        if (incomeRows.length === 0) {
+          if (incomeList)
+            incomeList.innerHTML =
+              '<li class="list-group-item text-muted">No recent income</li>';
         } else {
-          incomeRows.slice(0,6).forEach(r=> incomeList.appendChild(renderItem(r,'income')));
+          incomeRows
+            .slice(0, 6)
+            .forEach((r) => incomeList.appendChild(renderItem(r, "income")));
         }
 
-        if(expenseRows.length === 0){
-          if(expenseList) expenseList.innerHTML = '<li class="list-group-item text-muted">No recent expenses</li>';
+        if (expenseRows.length === 0) {
+          if (expenseList)
+            expenseList.innerHTML =
+              '<li class="list-group-item text-muted">No recent expenses</li>';
         } else {
-          expenseRows.slice(0,6).forEach(r=> expenseList.appendChild(renderItem(r,'expense')));
+          expenseRows
+            .slice(0, 6)
+            .forEach((r) => expenseList.appendChild(renderItem(r, "expense")));
         }
       }
 
       // Render category list (right column) from donut data
-      function renderCategoryList(containerId, data){
+      function renderCategoryList(containerId, data) {
         const el = document.getElementById(containerId);
-        if(!el) return;
-        el.innerHTML = '';
-        if(!Array.isArray(data) || data.length === 0){
+        if (!el) return;
+        el.innerHTML = "";
+        if (!Array.isArray(data) || data.length === 0) {
           el.innerHTML = '<li class="text-muted small">No categories</li>';
           return;
         }
-        data.forEach(d=>{
-          const li = document.createElement('li');
-          li.className = 'd-flex justify-content-between py-2 border-bottom';
-          const left = document.createElement('div'); left.textContent = d.category;
-          const right = document.createElement('div'); right.textContent = formatCurrency(Number(d.total || 0));
-          li.appendChild(left); li.appendChild(right);
+        data.forEach((d) => {
+          const li = document.createElement("li");
+          li.className = "d-flex justify-content-between py-2 border-bottom";
+          const left = document.createElement("div");
+          left.textContent = d.category;
+          const right = document.createElement("div");
+          right.textContent = formatCurrency(Number(d.total || 0));
+          li.appendChild(left);
+          li.appendChild(right);
           el.appendChild(li);
         });
       }
 
       // Export current report (CSV) — categories + recent transactions
-      async function exportCurrentReport(){
+      async function exportCurrentReport() {
         // determine active tab
-        const activeTab = document.querySelector('.report-tab.active');
-        const target = activeTab ? activeTab.getAttribute('data-target') : 'incomeSection';
-        const type = (target === 'expenseSection') ? 'expense' : 'income';
+        const activeTab = document.querySelector(".report-tab.active");
+        const target = activeTab
+          ? activeTab.getAttribute("data-target")
+          : "incomeSection";
+        const type = target === "expenseSection" ? "expense" : "income";
 
         // fetch donut data and recent transactions
-        const donutData = await getDonutData(type) || [];
-        const recent = await fetchRecentTransactions(50) || [];
+        const donutData = (await getDonutData(type)) || [];
+        const recent = (await fetchRecentTransactions(50)) || [];
 
         // build CSV content
         const lines = [];
-        lines.push([`Report Type:`, type.toUpperCase(), `Generated:`, new Date().toISOString()].join(','));
-        lines.push('');
-        lines.push(['Category','Total'].join(','));
-        donutData.forEach(d => lines.push([`"${(d.category||'').replace(/"/g,'""') }"`, Number(d.total||0)].join(',')));
-        lines.push('');
-        lines.push(['Recent Transactions:','','',''].join(','));
-        lines.push(['id','date','type','category','description','amount'].join(','));
-        recent.forEach(r => {
+        lines.push(
+          [
+            `Report Type:`,
+            type.toUpperCase(),
+            `Generated:`,
+            new Date().toISOString(),
+          ].join(",")
+        );
+        lines.push("");
+        lines.push(["Category", "Total"].join(","));
+        donutData.forEach((d) =>
+          lines.push(
+            [
+              `"${(d.category || "").replace(/"/g, '""')}"`,
+              Number(d.total || 0),
+            ].join(",")
+          )
+        );
+        lines.push("");
+        lines.push(["Recent Transactions:", "", "", ""].join(","));
+        lines.push(
+          ["id", "date", "type", "category", "description", "amount"].join(",")
+        );
+        recent.forEach((r) => {
           const row = [
             r.id,
-            r.occurred_at || r.date || '',
-            r.type || '',
-            `"${(r.category||'').toString().replace(/"/g,'""')}"`,
-            `"${(r.description||'').toString().replace(/"/g,'""')}"`,
-            Number(r.amount||0)
+            r.occurred_at || r.date || "",
+            r.type || "",
+            `"${(r.category || "").toString().replace(/"/g, '""')}"`,
+            `"${(r.description || "").toString().replace(/"/g, '""')}"`,
+            Number(r.amount || 0),
           ];
-          lines.push(row.join(','));
+          lines.push(row.join(","));
         });
 
-        const csv = lines.join('\n');
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const csv = lines.join("\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
-        const month = new Date().toISOString().slice(0,7).replace('-','');
+        const month = new Date().toISOString().slice(0, 7).replace("-", "");
         a.download = `report-${type}-${month}.csv`;
         document.body.appendChild(a);
         a.click();
@@ -540,14 +688,20 @@
       }
 
       // bind export button
-      const exportBtn = document.getElementById('exportBtn');
-      if(exportBtn) exportBtn.addEventListener('click', async ()=>{
-        exportBtn.disabled = true;
-        exportBtn.textContent = 'Preparing...';
-        try{ await exportCurrentReport(); }catch(e){ console.error('Export failed', e); alert('Export failed: ' + (e && e.message)); }
-        exportBtn.disabled = false;
-        exportBtn.textContent = 'Export';
-      });
+      const exportBtn = document.getElementById("exportBtn");
+      if (exportBtn)
+        exportBtn.addEventListener("click", async () => {
+          exportBtn.disabled = true;
+          exportBtn.textContent = "Preparing...";
+          try {
+            await exportCurrentReport();
+          } catch (e) {
+            console.error("Export failed", e);
+            alert("Export failed: " + (e && e.message));
+          }
+          exportBtn.disabled = false;
+          exportBtn.textContent = "Export";
+        });
     </script>
   </body>
 </html>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 25 Nov 2025 pada 14.16
+-- Waktu pembuatan: 26 Nov 2025 pada 13.47
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.0.30
 
@@ -84,7 +84,8 @@ CREATE TABLE `goals` (
 
 INSERT INTO `goals` (`id`, `user_id`, `title`, `target_amount`, `current_amount`, `target_date`, `is_active`, `created_at`, `updated_at`) VALUES
 (1, 223, 'yoo', 2000, 1120, '2025-11-18', 1, '2025-11-18 13:07:24', '2025-11-18 13:18:24'),
-(2, 223, 'yyhh', 50000, 12210, '2025-11-30', 1, '2025-11-18 14:19:19', '2025-11-18 18:25:07');
+(2, 223, 'yyhh', 50000, 12210, '2025-11-30', 1, '2025-11-18 14:19:19', '2025-11-18 18:25:07'),
+(3, 223, 'nikah', 100000, 30000, '2026-06-26', 1, '2025-11-26 08:15:27', '2025-11-26 08:15:45');
 
 -- --------------------------------------------------------
 
@@ -110,7 +111,8 @@ INSERT INTO `goal_contributions` (`id`, `goal_id`, `user_id`, `amount`, `contrib
 (3, 2, 223, 100, '2025-11-18 18:24:47'),
 (4, 2, 223, 500, '2025-11-18 18:24:53'),
 (5, 2, 223, 500, '2025-11-18 18:24:59'),
-(6, 2, 223, 10000, '2025-11-18 18:25:07');
+(6, 2, 223, 10000, '2025-11-18 18:25:07'),
+(7, 3, 223, 20000, '2025-11-26 08:15:45');
 
 -- --------------------------------------------------------
 
@@ -144,7 +146,9 @@ INSERT INTO `transactions` (`id`, `user_id`, `account_id`, `category_id`, `type`
 (1, 223, NULL, 3, 'income', 20000, 'IDR', '2025-11-17 00:00:00', 'bekel', 'Cash', NULL, 0, '2025-11-17 19:06:46', '2025-11-17 19:06:46', NULL),
 (2, 223, NULL, 4, 'expense', 50000, 'IDR', '2025-11-17 00:00:00', 'bakso', 'Cash', NULL, 0, '2025-11-17 20:20:18', '2025-11-17 20:20:18', NULL),
 (3, 223, NULL, 3, 'income', 20, 'IDR', '2025-11-25 00:00:00', 'waw', 'Cash', NULL, 0, '2025-11-25 19:58:30', '2025-11-25 19:58:30', NULL),
-(4, 223, NULL, 3, 'income', 50000, 'IDR', '2025-11-25 00:00:00', 'apa', 'Cash', NULL, 0, '2025-11-25 20:08:05', '2025-11-25 20:08:05', NULL);
+(4, 223, NULL, 3, 'income', 50000, 'IDR', '2025-11-25 00:00:00', 'apa', 'Cash', NULL, 0, '2025-11-25 20:08:05', '2025-11-25 20:08:05', NULL),
+(5, 223, NULL, 3, 'income', 50000, 'IDR', '2025-11-26 00:00:00', 'dagang', 'Cash', NULL, 0, '2025-11-26 08:12:23', '2025-11-26 08:12:23', NULL),
+(6, 223, NULL, 4, 'expense', 20000, 'IDR', '2025-11-26 00:00:00', 'bakso', 'Cash', NULL, 0, '2025-11-26 08:14:07', '2025-11-26 08:14:07', NULL);
 
 -- --------------------------------------------------------
 
@@ -243,19 +247,19 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT untuk tabel `goals`
 --
 ALTER TABLE `goals`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT untuk tabel `goal_contributions`
 --
 ALTER TABLE `goal_contributions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT untuk tabel `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`

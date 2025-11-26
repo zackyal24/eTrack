@@ -1,0 +1,361 @@
+/* Sidebar (left strip) - same as other service pages */
+.app-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: 200px;
+  background: white;
+  padding: 18px 14px;
+  box-sizing: border-box;
+  color: #003b82;
+  box-shadow: 0 12px 36px rgba(3, 59, 130, 0.12);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  z-index: 1040;
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* subtle lift on hover for pointer devices */
+@media (hover: hover) and (pointer: fine) {
+  .app-sidebar:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 44px rgba(3, 59, 130, 0.18);
+  }
+}
+
+.app-sidebar .brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  padding-top: 12px;
+  gap: 8px;
+}
+.app-sidebar .brand img {
+  height: 56px;
+  width: 56px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 8px 26px rgba(3, 59, 130, 0.14);
+}
+.app-sidebar .nav-list {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.app-sidebar a.nav-link {
+  color: #003b82;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 10px 12px;
+  border-radius: 8px;
+  display: block;
+}
+.app-sidebar a.nav-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-3px);
+  transition: all 0.14s ease;
+}
+.app-sidebar a.nav-link.active,
+.app-sidebar a.nav-link.active:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #003b82;
+}
+.app-sidebar a.nav-link.logout {
+  color: #003b82;
+  opacity: 0.95;
+}
+.app-sidebar {
+  padding: 22px 14px;
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+/* subtle lift on hover for pointer devices */
+@media (hover: hover) and (pointer: fine) {
+  .app-sidebar:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 44px rgba(3, 59, 130, 0.18);
+  }
+}
+
+/* push main content to the right of sidebar on wider screens; hide top-nav on desktop */
+@media (min-width: 768px) {
+  .top-nav {
+    display: none !important;
+  }
+}
+
+/* mobile: hide sidebar by default and provide overlay/menu */
+@media (max-width: 767px) {
+  .app-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    z-index: 1055;
+  }
+  .app-sidebar.open {
+    transform: translateX(0);
+  }
+  .sidebar-overlay {
+    display: none;
+  }
+  .sidebar-overlay.show {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1050;
+  }
+  /* ensure main content not pushed on mobile */
+  .content-inner {
+    margin-left: 0;
+    padding: 12px;
+  }
+}
+
+/* mobile small menu (anchored to navbar menu button) */
+.mobile-menu-overlay {
+  display: none;
+}
+.mobile-menu-overlay.show {
+  display: block;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 1050;
+}
+.mobile-menu {
+  position: fixed;
+  top: 56px;
+  right: 12px;
+  z-index: 1060;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(4px);
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  min-width: 160px;
+  padding: 8px;
+  display: none;
+}
+.mobile-menu.show {
+  display: block;
+}
+.mobile-menu a {
+  display: block;
+  padding: 8px 10px;
+  color: #083b73;
+  text-decoration: none;
+  border-radius: 6px;
+}
+.mobile-menu a:hover {
+  background: rgba(3, 59, 130, 0.06);
+}
+
+.top-nav {
+  background: #003b82;
+  color: white;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* layout helpers */
+.main {
+  padding-left: 0;
+}
+.content-inner {
+  max-width: 900px;
+  margin: 12px auto;
+  padding: 0 12px;
+}
+@media (min-width: 768px) {
+  .main {
+    padding-left: 220px;
+  }
+}
+
+/* page header: title on top, actions below (right-aligned) */
+.page-header {
+  margin-top: 10px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+.page-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+.page-header .header-actions {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* goals list */
+.goals-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.goal-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 8px 22px rgba(3, 59, 130, 0.04);
+  border: 1px solid rgba(11, 110, 66, 0.06);
+}
+.goal-card .goal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.goal-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e9f6ee;
+  color: #065a3b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 6px 16px rgba(15, 122, 77, 0.06);
+}
+.goal-meta {
+  font-size: 13px;
+  color: #4f6174;
+  margin-top: 4px;
+}
+.amount-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+}
+.amount-row .left,
+.amount-row .right {
+  font-size: 13px;
+  color: #4f6174;
+}
+.goal-progress {
+  margin-top: 10px;
+}
+.goal-progress .progress {
+  height: 8px;
+  border-radius: 8px;
+  background: #eef6ff;
+  overflow: hidden;
+}
+.goal-progress .progress-bar {
+  height: 8px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #0f7a4d, #0b6e42);
+}
+.goal-progress .pct {
+  text-align: center;
+  font-size: 12px;
+  color: #4f6174;
+  margin-top: 8px;
+}
+.contribute-btn {
+  background: #083b73;
+  color: white;
+  border-radius: 22px;
+  padding: 8px 18px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* small add-goal pill (positioned in header) */
+.add-goal-btn {
+  background: #083b73;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 18px;
+  font-weight: 600;
+}
+
+/* responsive tweak: make cards full-width on small screens and spacing match mock */
+@media (max-width: 575px) {
+  .content-inner {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .goal-card {
+    padding: 14px;
+  }
+  .goal-head {
+    align-items: center;
+  }
+  .goal-icon {
+    width: 44px;
+    height: 44px;
+  }
+  .contribute-btn {
+    width: 120px;
+    justify-content: center;
+  }
+}
+
+/* modal styles (lightweight custom popups) */
+.popup-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.36);
+  z-index: 1080;
+  align-items: center;
+  justify-content: center;
+}
+.popup-overlay.show {
+  display: flex;
+}
+.popup-card {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 18px 40px rgba(3, 59, 130, 0.16);
+  width: 320px;
+  max-width: 92%;
+}
+.popup-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+}
+.popup-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(3, 59, 130, 0.08);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+.btn-primary-ghost {
+  background: #083b73;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+@media (max-width: 575px) {
+  .page-header {
+    flex-direction: row;
+    gap: 8px;
+  }
+  .popup-card {
+    width: 92%;
+  }
+}
