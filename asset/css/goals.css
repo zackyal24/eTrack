@@ -264,6 +264,26 @@
   color: #4f6174;
   margin-top: 8px;
 }
+
+.delete-goal {
+  color: white;
+  border-radius: 22px;
+  padding: 8px 18px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-goal {
+  color: white;
+  border-radius: 22px;
+  padding: 8px 18px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
 .contribute-btn {
   background: #083b73;
   color: white;
