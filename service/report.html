@@ -45,7 +45,9 @@
         <a href="dashboard.html" class="nav-link">Dashboard</a>
         <a href="report.html" class="nav-link active">Report</a>
         <a href="goals.html" class="nav-link">Goals</a>
-        <a href="#" class="nav-link logout">Log out</a>
+        <a href="../index.html" class="nav-link logout text-danger fw-semi-bold" onclick="logout()">
+          Log out
+        </a>
       </nav>
     </aside>
 
@@ -61,7 +63,9 @@
       <a href="dashboard.html">Dashboard</a>
       <a href="report.html">Report</a>
       <a href="goals.html">Goals</a>
-      <a href="../index.html" class="logout">Log out</a>
+      <a href="../index.html" class="nav-link logout text-danger fw-semi-bold" onclick="logout()">
+          Log out
+        </a>
     </div>
 
     <!-- Top Navigation (mobile) - match dashboard markup -->
@@ -254,6 +258,17 @@
       const mobileMenu = document.getElementById("mobileMenu");
       const mobileMenuOverlay = document.getElementById("mobileMenuOverlay");
 
+      // PROTECT PAGE
+      const userId = localStorage.getItem("etrack_user_id");
+      if (!userId) {
+        window.location.href = "../index.html"; // Redirect ke login
+      }
+
+      function logout() {
+        localStorage.clear();
+        window.location.href = "../index.html";
+      }
+
       // populate sidebar and mobile username from localStorage
       (function () {
         const name = localStorage.getItem("etrack_user_name") || "User";
@@ -353,8 +368,7 @@
       }
 
       // Use backend on localhost if file:// protocol (helps when opening HTML directly)
-      const API_BASE =
-        location.protocol === "file:" ? "http://localhost:3000" : "";
+      const API_BASE = "http://localhost:3000";
 
       async function getDonutData(type) {
         const month = new Date().toISOString().slice(0, 7); // YYYY-MM
@@ -537,7 +551,7 @@
 
       // Fetch recent transactions and render Recent Income/Expenses
       async function fetchRecentTransactions(limit = 10) {
-        const userId = Number(localStorage.getItem("etrack_user_id") || 1);
+        const userId = Number(localStorage.getItem("etrack_user_id"));
         const url = `${API_BASE}/transactions?user_id=${encodeURIComponent(
           userId
         )}&limit=${encodeURIComponent(limit)}`;
