@@ -103,4 +103,102 @@ router.post('/', async (req, res) => {
   }
 });
 
+router.delete('/:id', async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    const [result] = await pool.query(
+      "DELETE FROM transactions WHERE id = ?",
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Delete transaction error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// PUT /transactions/:id
+// Body: { category?, type?, amount?, occurred_at?, description?, payment_type? }
+router.put('/:id', async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'ID tidak valid' });
+
+    // ambil data transaksi dari body
+    const {
+      category,
+      type,
+      amount,
+      occurred_at,
+      description,
+      payment_type
+    } = req.body;
+
+    // cek apakah transaksi ada
+    const [existingRows] = await pool.query(
+      'SELECT * FROM transactions WHERE id = ?',
+      [id]
+    );
+
+    if (!existingRows || existingRows.length === 0) {
+      return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
+    }
+
+    let categoryId = null;
+    if (category) {
+      // cek apakah kategori sudah ada
+      const [catRows] = await pool.query(
+        'SELECT id FROM categories WHERE name = ? AND (user_id = ? OR user_id IS NULL) LIMIT 1',
+        [category, existingRows[0].user_id]
+      );
+
+      if (catRows && catRows.length > 0) {
+        categoryId = catRows[0].id;
+      } else {
+        // buat kategori baru
+        const [catResult] = await pool.query(
+          'INSERT INTO categories (user_id, name) VALUES (?, ?)',
+          [existingRows[0].user_id, category]
+        );
+        categoryId = catResult.insertId;
+      }
+    }
+
+    // build update query
+    let updateFields = [];
+    let params = [];
+
+    if (categoryId !== null) { updateFields.push('category_id = ?'); params.push(categoryId); }
+    if (type) { updateFields.push('type = ?'); params.push(type); }
+    if (amount != null) { updateFields.push('amount = ?'); params.push(amount); }
+    if (occurred_at) { updateFields.push('occurred_at = ?'); params.push(occurred_at); }
+    if (description != null) { updateFields.push('description = ?'); params.push(description); }
+    if (payment_type != null) { updateFields.push('payment_type = ?'); params.push(payment_type); }
+
+    if (updateFields.length === 0) {
+      return res.status(400).json({ error: 'Tidak ada data untuk diupdate' });
+    }
+
+    const sql = `UPDATE transactions SET ${updateFields.join(', ')} WHERE id = ?`;
+    params.push(id);
+
+    await pool.query(sql, params);
+
+    // kembalikan transaksi terbaru
+    const [updatedRows] = await pool.query('SELECT * FROM transactions WHERE id = ?', [id]);
+    res.json(updatedRows[0]);
+  } catch (err) {
+    console.error('transactions PUT error', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
 module.exports = router;
