@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const auth = require('../middleware/auth');
 
 // helper to detect a field from a list of candidates
 async function detectTransactionFields() {
