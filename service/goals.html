@@ -1,303 +1,646 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>eTrack — Goals</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../asset/css/styles.css">
-  <link rel="stylesheet" href="../asset/css/goals.css">
-</head>
-<body>
-
-  <!-- Left Sidebar -->
-  <aside class="app-sidebar">
-    <div class="brand">
-      <img src="../asset/img/logo.png" alt="eTrack logo" class="brand-logo">
-      <div id="sidebarUser" style="text-align:center;margin-top:4px;">
-        <div id="sidebarUserName" style="font-weight:700;font-size:14px;line-height:1;">User</div>
-      </div>
-    </div>
-    <nav class="nav-list">
-      <a href="dashboard.html" class="nav-link">Dashboard</a>
-      <a href="report.html" class="nav-link">Report</a>
-      <a href="goals.html" class="nav-link active">Goals</a>
-      <a href="../index.html" class="nav-link logout">Log out</a>
-    </nav>
-  </aside>
-
-  <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
-  <div id="mobileMenuOverlay" class="mobile-menu-overlay" aria-hidden="true"></div>
-  <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="report.html">Report</a>
-    <a href="goals.html">Goals</a>
-    <a href="../index.html" class="logout">Log out</a>
-  </div>
-
-  <div class="top-nav">
-    <div class="d-flex align-items-center gap-2">
-      <img src="../asset/img/logo.png" style="height:34px;" alt="logo">
-      <span id="mobileUserName" class="mobile-username">User</span>
-    </div>
-    <button id="navMenuBtn" class="btn text-white">☰</button>
-  </div>
-
-  <div class="main">
-    <div class="content-inner">
-      <script>
-        (function(){
-          const name = localStorage.getItem('etrack_user_name') || 'User';
-          const elName = document.getElementById('sidebarUserName'); if(elName) elName.textContent = name;
-          const mobileEl = document.getElementById('mobileUserName'); if(mobileEl) mobileEl.textContent = name;
-        })();
-      </script>
-      <div class="page-header">
-        <div>
-          <h1>Goals</h1>
-          <div class="text-muted small">Track savings goals and contribute</div>
-        </div>
-        <div class="header-actions">
-          <button id="addGoalBtn" class="add-goal-btn">+ add goal</button>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>eTrack — Goals</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../asset/css/styles.css" />
+    <link rel="stylesheet" href="../asset/css/goals.css" />
+  </head>
+  <body>
+    <!-- Left Sidebar -->
+    <aside class="app-sidebar">
+      <div class="brand">
+        <img src="../asset/img/logo.png" alt="eTrack logo" class="brand-logo" />
+        <div id="sidebarUser" style="text-align: center; margin-top: 4px">
+          <div
+            id="sidebarUserName"
+            style="font-weight: 700; font-size: 14px; line-height: 1"
+          >
+            User
+          </div>
         </div>
       </div>
+      <nav class="nav-list">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="report.html" class="nav-link">Report</a>
+        <a href="goals.html" class="nav-link active">Goals</a>
+        <a href="../index.html" class="nav-link logout text-danger fw-semi-bold" onclick="logout()">
+          Log out
+        </a>
+      </nav>
+    </aside>
 
-      <div id="goalsList" class="goals-wrap">
-        <div class="text-muted">Loading goals…</div>
+    <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+    <div
+      id="mobileMenuOverlay"
+      class="mobile-menu-overlay"
+      aria-hidden="true"
+    ></div>
+    <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="report.html">Report</a>
+      <a href="goals.html">Goals</a>
+      <a href="../index.html" class="nav-link logout text-danger fw-semi-bold" onclick="logout()">
+          Log out
+        </a>
+    </div>
+
+    <div class="top-nav">
+      <div class="d-flex align-items-center gap-2">
+        <img src="../asset/img/logo.png" style="height: 34px" alt="logo" />
+        <span id="mobileUserName" class="mobile-username">User</span>
       </div>
-
+      <button id="navMenuBtn" class="btn text-white">☰</button>
     </div>
-  </div>
 
-  <!-- Contribute Popup -->
-  <div id="contributeOverlay" class="popup-overlay" aria-hidden="true">
-    <div class="popup-card">
-      <h3 id="contributeTitle">Contribute</h3>
-      <form id="contributeForm">
-        <div class="mb-2 small text-muted">Amount</div>
-        <input id="contributeAmount" name="amount" type="number" step="0.01" class="form-control" placeholder="0.00" required>
-        <div class="popup-actions">
-          <button type="button" id="contribCancel" class="btn-ghost">Cancel</button>
-          <button type="submit" class="btn-primary-ghost">Confirm</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Add Goal Popup -->
-  <div id="addGoalOverlay" class="popup-overlay" aria-hidden="true">
-    <div class="popup-card">
-      <h3>Add Goal</h3>
-      <form id="addGoalForm">
-        <div class="mb-2"><input name="name" class="form-control" placeholder="Goal Name*" required></div>
-        <div class="mb-2"><input name="target" type="number" class="form-control" placeholder="Target Amount*" required></div>
-        <div class="mb-2"><input name="current" type="number" class="form-control" placeholder="Current Amount" value="0"></div>
-        <div class="mb-2"><input name="deadline" type="date" class="form-control" placeholder="Deadline"></div>
-        <div class="popup-actions">
-          <button type="button" id="addCancel" class="btn-ghost">Cancel</button>
-          <button type="submit" class="btn-primary-ghost">Save</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script>
-    // Base API URL — adjust if your backend runs on a different host/port
-    const API_BASE = 'http://localhost:3000';
-
-    // Sidebar / mobile menu toggle (reuse pattern)
-    const sidebar = document.querySelector('.app-sidebar');
-    const navMenuBtn = document.getElementById('navMenuBtn');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-    const mobileMenu = document.getElementById('mobileMenu');
-    const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
-
-    function openSidebar() { sidebar && sidebar.classList.add('open'); sidebarOverlay && sidebarOverlay.classList.add('show'); sidebarOverlay && sidebarOverlay.setAttribute('aria-hidden','false'); }
-    function closeSidebar() { sidebar && sidebar.classList.remove('open'); sidebarOverlay && sidebarOverlay.classList.remove('show'); sidebarOverlay && sidebarOverlay.setAttribute('aria-hidden','true'); }
-
-    navMenuBtn && navMenuBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (window.innerWidth <= 767) {
-        const isOpen = mobileMenu.classList.contains('show');
-        if (isOpen) {
-          mobileMenu.classList.remove('show'); mobileMenuOverlay.classList.remove('show'); mobileMenu.setAttribute('aria-hidden','true'); mobileMenuOverlay.setAttribute('aria-hidden','true');
-        } else {
-          mobileMenu.classList.add('show'); mobileMenuOverlay.classList.add('show'); mobileMenu.setAttribute('aria-hidden','false'); mobileMenuOverlay.setAttribute('aria-hidden','false');
-        }
-        return;
-      }
-      openSidebar();
-    });
-
-    sidebarOverlay && sidebarOverlay.addEventListener('click', () => closeSidebar());
-    mobileMenuOverlay && mobileMenuOverlay.addEventListener('click', () => { mobileMenu.classList.remove('show'); mobileMenuOverlay.classList.remove('show'); mobileMenu.setAttribute('aria-hidden','true'); mobileMenuOverlay.setAttribute('aria-hidden','true'); });
-
-    // Popups and forms
-    const contributeOverlay = document.getElementById('contributeOverlay');
-    const addGoalOverlay = document.getElementById('addGoalOverlay');
-    const contributeForm = document.getElementById('contributeForm');
-    const addGoalForm = document.getElementById('addGoalForm');
-    const goalsListEl = document.getElementById('goalsList');
-    let activeGoalId = null;
-
-    function getUserId() {
-      const id = localStorage.getItem('etrack_user_id');
-      return id ? Number(id) : null;
-    }
-
-    function fmtCurrency(n){
-      try { return 'Rp ' + new Intl.NumberFormat('id-ID').format(Number(n || 0)); } catch(e){ return 'Rp ' + (n || 0); }
-    }
-
-    function daysLeft(deadline){
-      if(!deadline) return '';
-      const d = new Date(deadline);
-      const now = new Date();
-      const diff = Math.ceil((d - now) / (1000*60*60*24));
-      if(isNaN(diff)) return '';
-      return diff >= 0 ? `${diff} days left` : 'past due';
-    }
-
-    async function loadGoals(){
-      const userId = getUserId();
-      if(!userId){ console.warn('no user id in localStorage'); return; }
-      try{
-        const res = await fetch(`${API_BASE}/goals?user_id=${userId}`);
-        if(!res.ok) throw new Error('Failed to fetch goals');
-        const data = await res.json();
-        renderGoals(data);
-      }catch(err){ console.error('loadGoals error', err); }
-    }
-
-    // Improve user-visible error when goals fail to load
-    async function loadGoalsWithUI(){
-      const el = document.getElementById('goalsList');
-      el.innerHTML = '<div class="text-muted">Loading goals…</div>';
-      try{
-        await loadGoals();
-      }catch(err){
-        console.error('loadGoalsWithUI error', err);
-        el.innerHTML = `<div class="text-danger">Failed to load goals: ${escapeHtml(String(err.message || err))}</div>`;
-      }
-    }
-
-    function renderGoals(goals){
-      goalsListEl.innerHTML = '';
-      if(!goals || goals.length === 0){
-        goalsListEl.innerHTML = '<div class="text-muted">No goals yet. Click "+ add goal" to create one.</div>';
-        return;
-      }
-
-      goals.forEach(g => {
-        const pct = g.target_amount > 0 ? Math.round((g.current_amount / g.target_amount) * 100) : 0;
-        const card = document.createElement('div'); card.className = 'goal-card';
-        card.innerHTML = `
-          <div class="goal-head">
-            <div class="d-flex align-items-start gap-3">
-              <div class="goal-icon">🎯</div>
-              <div>
-                <div class="fw-bold">${escapeHtml(g.name)}</div>
-                <div class="goal-meta">${daysLeft(g.deadline)}</div>
-              </div>
-            </div>
-            <div class="text-end small">
-              <div>${fmtCurrency(g.current_amount)}</div>
-              <div class="text-muted">${fmtCurrency(g.target_amount)}</div>
+    <div class="main">
+      <div class="content-inner">
+        <script>
+          (function () {
+            const name = localStorage.getItem("etrack_user_name") || "User";
+            const elName = document.getElementById("sidebarUserName");
+            if (elName) elName.textContent = name;
+            const mobileEl = document.getElementById("mobileUserName");
+            if (mobileEl) mobileEl.textContent = name;
+          })();
+        </script>
+        <div class="page-header">
+          <div>
+            <h1>Goals</h1>
+            <div class="text-muted small">
+              Track savings goals and contribute
             </div>
           </div>
-          <div class="amount-row">
-            <div class="left">${fmtCurrency(g.current_amount)}</div>
-            <div class="right">${fmtCurrency(g.target_amount)}</div>
+          <div class="header-actions">
+            <button id="addGoalBtn" class="add-goal-btn">+ add goal</button>
           </div>
-          <div class="goal-progress">
-            <div class="progress"><div class="progress-bar" role="progressbar" style="width:${pct}%" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"></div></div>
-            <div class="pct">${pct}% progress</div>
-          </div>
-          <div class="d-flex justify-content-center mt-3">
-            <button class="contribute-btn" data-goal-id="${g.id}">Contribute</button>
-          </div>`;
+        </div>
 
-        // attach handlers
-        const btn = card.querySelector('.contribute-btn');
-        btn && btn.addEventListener('click', (ev) => {
-          activeGoalId = Number(ev.currentTarget.dataset.goalId);
-          document.getElementById('contributeTitle').textContent = 'Contribute to ' + g.name;
-          contributeOverlay.classList.add('show'); contributeOverlay.setAttribute('aria-hidden','false');
-          document.getElementById('contributeAmount').focus();
+        <div id="goalsList" class="goals-wrap">
+          <div class="text-muted">Loading goals…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contribute Popup -->
+    <div id="contributeOverlay" class="popup-overlay" aria-hidden="true">
+      <div class="popup-card">
+        <h3 id="contributeTitle">Contribute</h3>
+        <form id="contributeForm">
+          <div class="mb-2 small text-muted">Amount</div>
+          <input
+            id="contributeAmount"
+            name="amount"
+            type="number"
+            step="0.01"
+            class="form-control"
+            placeholder="0.00"
+            required
+          />
+          <div class="popup-actions">
+            <button type="button" id="contribCancel" class="btn-ghost">
+              Cancel
+            </button>
+            <button type="submit" class="btn-primary-ghost">Confirm</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Goal Popup -->
+    <div id="addGoalOverlay" class="popup-overlay" aria-hidden="true">
+      <div class="popup-card">
+        <h3>Add Goal</h3>
+        <form id="addGoalForm">
+          <div class="mb-2">
+            <input
+              name="name"
+              class="form-control"
+              placeholder="Goal Name*"
+              required
+            />
+          </div>
+          <div class="mb-2">
+            <input
+              name="target"
+              type="number"
+              class="form-control"
+              placeholder="Target Amount*"
+              required
+              min="0"
+              s
+              tep="1"
+            />
+          </div>
+          <div class="mb-2">
+            <input
+              name="current"
+              type="number"
+              class="form-control"
+              placeholder="Current Amount"
+              value="0"
+              min="0"
+              step="1"
+            />
+          </div>
+          <div class="mb-2">
+            <input
+              name="deadline"
+              type="date"
+              class="form-control"
+              placeholder="Deadline"
+            />
+          </div>
+          <div class="popup-actions">
+            <button type="button" id="addCancel" class="btn-ghost">
+              Cancel
+            </button>
+            <button type="submit" class="btn-primary-ghost">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit Goal Popup -->
+    <div id="editOverlay" class="popup-overlay" aria-hidden="true">
+      <div class="popup-card">
+        <h3>Edit Goal</h3>
+        <form id="editGoalForm">
+          <div class="mb-2">
+            <input
+              id="editGoalName"
+              class="form-control"
+              placeholder="Goal Name*"
+              required
+            />
+          </div>
+          <div class="mb-2">
+            <input
+              id="editGoalTarget"
+              type="number"
+              class="form-control"
+              min="1"
+              step="1"
+              placeholder="Target Amount*"
+              required
+            />
+          </div>
+          <div class="mb-2">
+            <input
+              id="editGoalDeadline"
+              type="date"
+              class="form-control"
+              placeholder="Deadline"
+            />
+          </div>
+
+          <div class="popup-actions">
+            <button type="button" id="editCancel" class="btn-ghost">
+              Cancel
+            </button>
+            <button type="submit" class="btn-primary-ghost">Update</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // Base API URL — adjust if your backend runs on a different host/port
+      const API_BASE = "http://localhost:3000";
+
+      // Sidebar / mobile menu toggle (reuse pattern)
+      const sidebar = document.querySelector(".app-sidebar");
+      const navMenuBtn = document.getElementById("navMenuBtn");
+      const sidebarOverlay = document.getElementById("sidebarOverlay");
+      const mobileMenu = document.getElementById("mobileMenu");
+      const mobileMenuOverlay = document.getElementById("mobileMenuOverlay");
+
+      // PROTECT PAGE
+      const userId = localStorage.getItem("etrack_user_id");
+      if (!userId) {
+        window.location.href = "../index.html"; // Redirect ke login
+      }
+
+      function logout() {
+        localStorage.clear();
+        window.location.href = "../index.html";
+      }
+
+      function openSidebar() {
+        sidebar && sidebar.classList.add("open");
+        sidebarOverlay && sidebarOverlay.classList.add("show");
+        sidebarOverlay && sidebarOverlay.setAttribute("aria-hidden", "false");
+      }
+      function closeSidebar() {
+        sidebar && sidebar.classList.remove("open");
+        sidebarOverlay && sidebarOverlay.classList.remove("show");
+        sidebarOverlay && sidebarOverlay.setAttribute("aria-hidden", "true");
+      }
+
+      navMenuBtn &&
+        navMenuBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (window.innerWidth <= 767) {
+            const isOpen = mobileMenu.classList.contains("show");
+            if (isOpen) {
+              mobileMenu.classList.remove("show");
+              mobileMenuOverlay.classList.remove("show");
+              mobileMenu.setAttribute("aria-hidden", "true");
+              mobileMenuOverlay.setAttribute("aria-hidden", "true");
+            } else {
+              mobileMenu.classList.add("show");
+              mobileMenuOverlay.classList.add("show");
+              mobileMenu.setAttribute("aria-hidden", "false");
+              mobileMenuOverlay.setAttribute("aria-hidden", "false");
+            }
+            return;
+          }
+          openSidebar();
         });
 
-        goalsListEl.appendChild(card);
+      sidebarOverlay &&
+        sidebarOverlay.addEventListener("click", () => closeSidebar());
+      mobileMenuOverlay &&
+        mobileMenuOverlay.addEventListener("click", () => {
+          mobileMenu.classList.remove("show");
+          mobileMenuOverlay.classList.remove("show");
+          mobileMenu.setAttribute("aria-hidden", "true");
+          mobileMenuOverlay.setAttribute("aria-hidden", "true");
+        });
+
+      // Popups and forms
+      const contributeOverlay = document.getElementById("contributeOverlay");
+      const addGoalOverlay = document.getElementById("addGoalOverlay");
+      // === Edit Goal Feature ===
+      const editOverlay = document.getElementById("editOverlay");
+      const editForm = document.getElementById("editGoalForm");
+      const contributeForm = document.getElementById("contributeForm");
+      const addGoalForm = document.getElementById("addGoalForm");
+      const goalsListEl = document.getElementById("goalsList");
+      let activeGoalId = null;
+
+      function getUserId() {
+        const id = localStorage.getItem("etrack_user_id");
+        return id ? Number(id) : null;
+      }
+
+      function fmtCurrency(n) {
+        try {
+          return "Rp " + new Intl.NumberFormat("id-ID").format(Number(n || 0));
+        } catch (e) {
+          return "Rp " + (n || 0);
+        }
+      }
+
+      function daysLeft(deadline) {
+        if (!deadline) return "";
+        const d = new Date(deadline);
+        const now = new Date();
+        const diff = Math.ceil((d - now) / (1000 * 60 * 60 * 24));
+        if (isNaN(diff)) return "";
+        return diff >= 0 ? `${diff} days left` : "past due";
+      }
+
+      async function loadGoals() {
+        const userId = getUserId();
+        if (!userId) {
+          console.warn("no user id in localStorage");
+          return;
+        }
+        try {
+          const res = await fetch(`${API_BASE}/goals?user_id=${userId}`);
+          if (!res.ok) throw new Error("Failed to fetch goals");
+          const data = await res.json();
+          renderGoals(data);
+        } catch (err) {
+          console.error("loadGoals error", err);
+        }
+      }
+
+      // Improve user-visible error when goals fail to load
+      async function loadGoalsWithUI() {
+        const el = document.getElementById("goalsList");
+        el.innerHTML = '<div class="text-muted">Loading goals…</div>';
+        try {
+          await loadGoals();
+        } catch (err) {
+          console.error("loadGoalsWithUI error", err);
+          el.innerHTML = `<div class="text-danger">Failed to load goals: ${escapeHtml(
+            String(err.message || err)
+          )}</div>`;
+        }
+      }
+
+      function renderGoals(goals) {
+        goalsListEl.innerHTML = "";
+        if (!goals || goals.length === 0) {
+          goalsListEl.innerHTML =
+            '<div class="text-muted">No goals yet. Click "+ add goal" to create one.</div>';
+          return;
+        }
+
+        goals.forEach((g) => {
+          const current = Math.max(0, g.current_amount);
+          const target = Math.max(1, g.target_amount);
+          let pct = Math.round((current / target) * 100);
+          pct = Math.min(pct, 100);
+          const achieved = pct >= 100;
+
+          const card = document.createElement("div");
+          card.className = "goal-card";
+          card.innerHTML = `
+      <div class="goal-head">
+        <div class="d-flex align-items-start gap-3">
+          <div class="goal-icon">🎯</div>
+          <div>
+            <div class="fw-bold">${escapeHtml(g.name)}</div>
+            <div class="goal-meta">${daysLeft(g.deadline)}</div>
+          </div>
+        </div>
+        <div class="text-end small">
+          <div>${fmtCurrency(current)}</div>
+          <div class="text-muted">${fmtCurrency(target)}</div>
+        </div>
+      </div>
+
+      ${
+        achieved
+          ? `<div class="goal-achieved text-center ">🎉 Goal Achieved!</div>`
+          : `
+        <div class="amount-row">
+          <div class="left">${fmtCurrency(current)}</div>
+          <div class="right">${fmtCurrency(target)}</div>
+        </div>`
+      }
+
+      <div class="goal-progress">
+        <div class="progress">
+          <div class="progress-bar"
+            role="progressbar"
+            style="width:${pct}%"
+            aria-valuenow="${pct}"
+            aria-valuemin="0"
+            aria-valuemax="100"></div>
+        </div>
+        <div class="pct">${pct}%</div>
+      </div>
+
+      <div class="d-flex justify-content-center mt-3 gap-2">
+        <button class="edit-goal bg-warning">Edit</button>
+        <button class="delete-goal bg-danger">Delete</button>
+        <button class="contribute-btn"${
+          achieved ? " disabled" : ""
+        }>Contribute</button>
+      </div>
+    `;
+
+          // === Contribute
+          card
+            .querySelector(".contribute-btn")
+            ?.addEventListener("click", () => {
+              activeGoalId = g.id;
+              window.activeGoalObj = g; // FIX: declare global safely
+              document.getElementById("contributeTitle").textContent =
+                "Contribute to " + g.name;
+              contributeOverlay.classList.add("show");
+              contributeOverlay.setAttribute("aria-hidden", "false");
+            });
+
+          // === Delete
+          card
+            .querySelector(".delete-goal")
+            ?.addEventListener("click", () => deleteGoal(g.id));
+
+          // === Edit
+          card
+            .querySelector(".edit-goal")
+            ?.addEventListener("click", () => openEditModal(g));
+
+          goalsListEl.appendChild(card);
+        });
+      }
+
+      function escapeHtml(str) {
+        if (!str) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;");
+      }
+
+      // Contribute form submit -> POST /goals/:id/contribute
+      contributeForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const amt = parseFloat(
+          document.getElementById("contributeAmount").value || 0
+        );
+        if (!activeGoalId || isNaN(amt) || amt <= 0) {
+          alert("Enter a valid amount");
+          return;
+        }
+        try {
+          const amt = Number(document.getElementById("contributeAmount").value);
+          const remaining =
+            activeGoalObj.target_amount - activeGoalObj.current_amount;
+
+          if (amt <= 0) {
+            alert("Amount must be positive!");
+            return;
+          }
+
+          if (amt > remaining) {
+            alert("Contribution exceeds goal target!");
+            return;
+          }
+
+          const res = await fetch(
+            `${API_BASE}/goals/${activeGoalId}/contribute`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ user_id: getUserId(), amount: amt }),
+            }
+          );
+          if (!res.ok) throw new Error("contribute failed");
+          contributeForm.reset();
+          contributeOverlay.classList.remove("show");
+          contributeOverlay.setAttribute("aria-hidden", "true");
+          await loadGoals();
+        } catch (err) {
+          console.error(err);
+          alert("Failed to contribute");
+        }
       });
-    }
 
-    function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;'); }
-
-    // Contribute form submit -> POST /goals/:id/contribute
-    contributeForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const amt = parseFloat(document.getElementById('contributeAmount').value || 0);
-      if(!activeGoalId || isNaN(amt) || amt <= 0){ alert('Enter a valid amount'); return; }
-      try{
-        const res = await fetch(`${API_BASE}/goals/${activeGoalId}/contribute`, {
-          method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: getUserId(), amount: amt })
-        });
-        if(!res.ok) throw new Error('contribute failed');
-        contributeForm.reset(); contributeOverlay.classList.remove('show'); contributeOverlay.setAttribute('aria-hidden','true');
-        await loadGoals();
-      }catch(err){ console.error(err); alert('Failed to contribute'); }
-    });
-
-    document.getElementById('contribCancel').addEventListener('click', () => { contributeOverlay.classList.remove('show'); contributeOverlay.setAttribute('aria-hidden','true'); contributeForm.reset(); activeGoalId = null; });
-
-    // Add goal: open/close
-    const addGoalBtn = document.getElementById('addGoalBtn');
-    addGoalBtn && addGoalBtn.addEventListener('click', () => { addGoalOverlay.classList.add('show'); addGoalOverlay.setAttribute('aria-hidden','false'); addGoalForm.querySelector('[name="name"]').focus(); });
-    document.getElementById('addCancel').addEventListener('click', () => { addGoalOverlay.classList.remove('show'); addGoalOverlay.setAttribute('aria-hidden','true'); addGoalForm.reset(); });
-
-    // Add goal submit -> POST /goals
-    addGoalForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const fd = new FormData(addGoalForm);
-      const payload = {
-        user_id: getUserId(),
-        name: fd.get('name'),
-        target_amount: parseFloat(fd.get('target')) || 0,
-        current_amount: parseFloat(fd.get('current')) || 0,
-        deadline: fd.get('deadline') || null
-      };
-      if(!payload.name || payload.target_amount <= 0){ alert('Please provide a name and target amount'); return; }
-      try{
-        const res = await fetch(`${API_BASE}/goals`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-        if(!res.ok){
-          let body = null;
-          try { body = await res.json(); } catch(e){}
-          const msg = (body && (body.error || body.message)) ? (body.error || body.message) : 'create failed';
-          throw new Error(msg);
-        }
-        addGoalForm.reset(); addGoalOverlay.classList.remove('show'); addGoalOverlay.setAttribute('aria-hidden','true');
-        await loadGoals();
-      }catch(err){ console.error('add goal error', err); alert('Failed to add goal: ' + (err.message || err)); }
-    });
-
-    // close popups on ESC or click outside
-    document.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Escape') {
-        contributeOverlay.classList.remove('show'); contributeOverlay.setAttribute('aria-hidden','true');
-        addGoalOverlay.classList.remove('show'); addGoalOverlay.setAttribute('aria-hidden','true');
+      document.getElementById("contribCancel").addEventListener("click", () => {
+        contributeOverlay.classList.remove("show");
+        contributeOverlay.setAttribute("aria-hidden", "true");
+        contributeForm.reset();
         activeGoalId = null;
+      });
+
+      // Add goal: open/close
+      const addGoalBtn = document.getElementById("addGoalBtn");
+      addGoalBtn &&
+        addGoalBtn.addEventListener("click", () => {
+          addGoalOverlay.classList.add("show");
+          addGoalOverlay.setAttribute("aria-hidden", "false");
+          addGoalForm.querySelector('[name="name"]').focus();
+        });
+      document.getElementById("addCancel").addEventListener("click", () => {
+        addGoalOverlay.classList.remove("show");
+        addGoalOverlay.setAttribute("aria-hidden", "true");
+        addGoalForm.reset();
+      });
+
+      // Add goal submit -> POST /goals
+      addGoalForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fd = new FormData(addGoalForm);
+        const payload = {
+          user_id: getUserId(),
+          name: fd.get("name"),
+          target_amount: parseFloat(fd.get("target")) || 0,
+          current_amount: parseFloat(fd.get("current")) || 0,
+          deadline: fd.get("deadline") || null,
+        };
+        if (!payload.name || payload.target_amount <= 0) {
+          alert("Please provide a name and target amount");
+          return;
+        }
+        try {
+          const res = await fetch(`${API_BASE}/goals`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) {
+            let body = null;
+            try {
+              body = await res.json();
+            } catch (e) {}
+            const msg =
+              body && (body.error || body.message)
+                ? body.error || body.message
+                : "create failed";
+            throw new Error(msg);
+          }
+          addGoalForm.reset();
+          addGoalOverlay.classList.remove("show");
+          addGoalOverlay.setAttribute("aria-hidden", "true");
+          await loadGoals();
+        } catch (err) {
+          console.error("add goal error", err);
+          alert("Failed to add goal: " + (err.message || err));
+        }
+      });
+
+      // close popups on ESC or click outside
+      document.addEventListener("keydown", (ev) => {
+        if (ev.key === "Escape") {
+          contributeOverlay.classList.remove("show");
+          contributeOverlay.setAttribute("aria-hidden", "true");
+          addGoalOverlay.classList.remove("show");
+          editOverlay.classList.remove("show");
+          addGoalOverlay.setAttribute("aria-hidden", "true");
+          activeGoalId = null;
+        }
+      });
+
+      // click outside to close
+      [contributeOverlay, addGoalOverlay, editOverlay].forEach(
+        (ov) =>
+          ov &&
+          ov.addEventListener("click", (ev) => {
+            if (ev.target === ov) {
+              ov.classList.remove("show");
+              ov.setAttribute("aria-hidden", "true");
+              activeGoalId = null;
+            }
+          })
+      );
+
+      // Open Edit Modal
+      function openEditModal(goal) {
+        document.getElementById("editGoalName").value = goal.name;
+        document.getElementById("editGoalTarget").value = goal.target_amount;
+        document.getElementById("editGoalDeadline").value =
+          goal.deadline?.slice(0, 10);
+
+        activeGoalId = goal.id;
+        editOverlay.classList.add("show");
+        editOverlay.setAttribute("aria-hidden", "false");
       }
-    });
 
-    // click outside to close
-    [contributeOverlay, addGoalOverlay].forEach(ov => ov && ov.addEventListener('click', (ev) => {
-      if (ev.target === ov) { ov.classList.remove('show'); ov.setAttribute('aria-hidden','true'); activeGoalId = null; }
-    }));
+      // Cancel Edit
+      document.getElementById("editCancel").addEventListener("click", () => {
+        editOverlay.classList.remove("show");
+        editOverlay.setAttribute("aria-hidden", "true");
+        editForm.reset();
+      });
 
-    // initial load (show UI errors when fetch fails)
-    loadGoalsWithUI();
-  </script>
-</body>
+      // Submit Edit -> PUT /goals/:id (FIX: include user_id + close modal properly)
+      editForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const payload = {
+          user_id: getUserId(),
+          name: document.getElementById("editGoalName").value.trim(),
+          target_amount: Number(
+            document.getElementById("editGoalTarget").value
+          ),
+          deadline: document.getElementById("editGoalDeadline").value || null,
+        };
+
+        if (!payload.name || payload.target_amount <= 0) {
+          alert("Invalid goal data");
+          return;
+        }
+
+        const res = await fetch(`${API_BASE}/goals/${activeGoalId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => null);
+          alert(errorData?.message || "Failed to update goal");
+          return;
+        }
+
+        editOverlay.classList.remove("show");
+        editOverlay.setAttribute("aria-hidden", "true");
+        editForm.reset();
+        activeGoalId = null;
+        loadGoals();
+      });
+
+      async function deleteGoal(id) {
+        if (!confirm("Are you sure? This cannot be undone!")) return;
+
+        const res = await fetch(`${API_BASE}/goals/${id}`, {
+          method: "DELETE",
+        });
+
+        if (res.ok) loadGoals();
+        else alert("Failed to delete goal");
+      }
+
+      // initial load (show UI errors when fetch fails)
+      loadGoalsWithUI();
+    </script>
+  </body>
 </html>
