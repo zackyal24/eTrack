@@ -197,6 +197,8 @@ body {
 .tx-card {
   padding: 12px;
   border-bottom: 1px solid #e6e6e6;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .tx-icon {
