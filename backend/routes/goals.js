@@ -219,4 +219,63 @@ router.post('/:id/contribute', async (req, res) => {
   }
 });
 
+// UPDATE GOAL (PUT /goals/:id)
+// UPDATE GOAL (PUT /goals/:id)
+router.put('/:id', async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { name, target_amount, deadline, user_id } = req.body;
+
+    if (!name || target_amount == null) {
+      return res.status(400).json({ message: "name & target_amount required" });
+    }
+
+    const sql = `
+      UPDATE goals
+      SET title = ?, target_amount = ?, target_date = ?, updated_at = NOW()
+      WHERE id = ? AND user_id = ?
+    `;
+
+    const [result] = await pool.query(sql, [
+      name,
+      target_amount,
+      deadline || null,
+      id,
+      user_id
+    ]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Goal not found or no permission" });
+    }
+
+    res.json({ success: true, updatedId: id });
+  } catch (err) {
+    console.error("Update goal error:", err);
+    res.status(500).json({ message: "Server error", error: err.sqlMessage });
+  }
+});
+
+
+
+// DELETE GOAL (DELETE /goals/:id)
+router.delete('/:id', async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    const [result] = await pool.query(
+      `DELETE FROM goals WHERE id = ?`,
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Goal not found" });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Delete goal error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;
