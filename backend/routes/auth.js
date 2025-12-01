@@ -1,29 +1,82 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcryptjs');
 const pool = require('../db');
 
-// Simple POST /auth/login
-// Body: { email, password, name? }
-// Behavior: if user exists, validate password; if not, create user. Returns { id, email, name }
-router.post('/login', async (req, res) => {
+/**
+ * REGISTER
+ */
+router.post('/register', async (req, res) => {
   try {
-    const { email, password, name } = req.body || {};
-    if(!email || !password) return res.status(400).json({ error: 'email and password required' });
+    const { email, password, name } = req.body;
 
-    const [rows] = await pool.query('SELECT id, email, password, name FROM users WHERE email = ? LIMIT 1', [email]);
-    if(rows && rows.length > 0){
-      const user = rows[0];
-      // NOTE: plaintext password comparison for dev only
-      if(user.password !== password) return res.status(401).json({ error: 'invalid credentials' });
-      return res.json({ id: user.id, email: user.email, name: user.name });
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password required" });
     }
 
-    // create user
-    const [r] = await pool.query('INSERT INTO users (email, password, name) VALUES (?, ?, ?)', [email, password, name || null]);
-    return res.json({ id: r.insertId, email, name: name || null });
+    // Check existing email
+    const [exist] = await pool.query(
+      "SELECT id FROM users WHERE email = ? LIMIT 1",
+      [email]
+    );
+    if (exist.length > 0) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+
+    const [r] = await pool.query(
+      "INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)",
+      [email, hashed, name || null]
+    );
+
+    return res.json({
+      message: "Register success",
+      userId: r.insertId,
+      email,
+      name: name || null
+    });
+
   } catch (err) {
-    console.error('auth/login error', err);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Register error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+/**
+ * LOGIN
+ */
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const [rows] = await pool.query(
+      "SELECT id, email, password_hash, name FROM users WHERE email = ? LIMIT 1",
+      [email]
+    );
+
+    if (rows.length === 0) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    const user = rows[0];
+    const match = await bcrypt.compare(password, user.password_hash);
+
+    if (!match) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    res.json({
+      message: "Login successful",
+      userId: user.id,
+      name: user.name,
+      email: user.email
+    });
+
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
