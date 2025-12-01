@@ -35,7 +35,9 @@
         <a href="dashboard.html" class="nav-link">Dashboard</a>
         <a href="report.html" class="nav-link">Report</a>
         <a href="goals.html" class="nav-link">Goals</a>
-        <a href="../index.html" class="nav-link logout">Log out</a>
+        <a href="../index.html" class="nav-link logout text-danger fw-semi-bold" onclick="logout()">
+          Log out
+        </a>
       </nav>
     </aside>
     <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
@@ -48,7 +50,9 @@
       <a href="dashboard.html">Dashboard</a>
       <a href="report.html">Report</a>
       <a href="goals.html">Goals</a>
-      <a href="../index.html" class="logout">Log out</a>
+      <a href="../index.html" class="nav-link logout text-danger fw-semi-bold" onclick="logout()">
+          Log out
+        </a>
     </div>
     <div class="top-nav">
       <div class="d-flex align-items-center gap-2">
@@ -145,6 +149,17 @@
     </div>
 
     <script>
+      // PROTECT PAGE
+      const userId = localStorage.getItem("etrack_user_id");
+      if (!userId) {
+        window.location.href = "../index.html"; // Redirect ke login
+      }
+
+      function logout() {
+        localStorage.clear();
+        window.location.href = "../index.html";
+      }
+
       const API_BASE = "http://localhost:3000";
       const form = document.getElementById("expenseForm");
       form.addEventListener("submit", async (e) => {
@@ -174,6 +189,7 @@
           alert("Failed to save expense. See console for details.");
         }
       });
+      
 
       // Sidebar mobile toggle (triggered from navbar menu button)
       const sidebar = document.querySelector(".app-sidebar");
