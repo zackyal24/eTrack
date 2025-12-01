@@ -1,206 +1,286 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>eTrack — Add Income</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../asset/css/styles.css">
-  <link rel="stylesheet" href="../asset/css/income.css">
-</head>
-<body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>eTrack — Add Income</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../asset/css/styles.css" />
+    <link rel="stylesheet" href="../asset/css/income.css" />
+  </head>
+  <body>
+    <!-- Left Sidebar -->
+    <aside class="app-sidebar">
+      <div class="brand">
+        <img src="../asset/img/logo.png" alt="eTrack logo" class="brand-logo" />
+        <div id="sidebarUser" style="text-align: center; margin-top: 4px">
+          <div
+            id="sidebarUserName"
+            style="font-weight: 700; font-size: 14px; line-height: 1"
+          >
+            User
+          </div>
+        </div>
+      </div>
+      <nav class="nav-list">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="report.html" class="nav-link">Report</a>
+        <a href="goals.html" class="nav-link">Goals</a>
+        <a href="../index.html" class="nav-link logout text-danger fw-semi-bold" onclick="logout()">
+          Log out
+        </a>
+      </nav>
+    </aside>
+    <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+    <div
+      id="mobileMenuOverlay"
+      class="mobile-menu-overlay"
+      aria-hidden="true"
+    ></div>
+    <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="report.html">Report</a>
+      <a href="goals.html">Goals</a>
+      <a href="../index.html" class="nav-link logout text-danger fw-semi-bold" onclick="logout()">
+          Log out
+        </a>
+    </div>
+    <div class="top-nav">
+      <div class="d-flex align-items-center gap-2">
+        <img src="../asset/img/logo.png" style="height: 34px" alt="logo" />
+        <span id="mobileUserName" class="mobile-username">User</span>
+      </div>
+      <button id="navMenuBtn" class="btn text-white">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          fill="currentColor"
+          class="bi bi-list"
+          viewBox="0 0 16 16"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"
+          />
+        </svg>
+      </button>
+    </div>
 
-  <!-- Left Sidebar -->
-  <aside class="app-sidebar">
-    <div class="brand">
-      <img src="../asset/img/logo.png" alt="eTrack logo" class="brand-logo">
-      <div id="sidebarUser" style="text-align:center;margin-top:4px;">
-        <div id="sidebarUserName" style="font-weight:700;font-size:14px;line-height:1;">User</div>
+    <div class="main">
+      <div class="form-wrap content-inner">
+        <script>
+          (function () {
+            const name = localStorage.getItem("etrack_user_name") || "User";
+            const elName = document.getElementById("sidebarUserName");
+            if (elName) elName.textContent = name;
+            const mobileEl = document.getElementById("mobileUserName");
+            if (mobileEl) mobileEl.textContent = name;
+          })();
+        </script>
+        <!-- Page header -->
+        <div class="page-header mt-3 mb-3">
+          <h2 class="h5 mb-1">Add Income</h2>
+          <div class="subtitle">Record a new income entry</div>
+        </div>
+        <div class="form-card">
+          <form id="incomeForm">
+            <div class="mb-3">
+              <label class="form-label small">Date</label>
+              <input type="date" class="form-control" name="date" required />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small">Type</label>
+              <select class="form-select" name="type">
+                <option>Cash</option>
+                <option>Card</option>
+                <option>Transfer</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small">Amount</label>
+              <input
+                type="number"
+                step="0.01"
+                class="form-control"
+                name="amount"
+                placeholder="800.000"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small">Category</label>
+              <select class="form-select" name="category">
+                <option>Salary</option>
+                <option>Bonus</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small">Note</label>
+              <input
+                type="text"
+                class="form-control"
+                name="note"
+                placeholder="Part Time"
+              />
+            </div>
+
+            <div class="d-flex justify-content-center mt-3">
+              <button type="submit" class="btn submit-btn">Submit</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-    <nav class="nav-list">
-      <a href="dashboard.html" class="nav-link">Dashboard</a>
-      <a href="report.html" class="nav-link">Report</a>
-      <a href="goals.html" class="nav-link">Goals</a>
-      <a href="../index.html" class="nav-link logout">Log out</a>
-    </nav>
-  </aside>
-  <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
-  <div id="mobileMenuOverlay" class="mobile-menu-overlay" aria-hidden="true"></div>
-  <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="report.html">Report</a>
-    <a href="goals.html">Goals</a>
-    <a href="../index.html" class="logout">Log out</a>
-  </div>
-  <div class="top-nav">
-    <div class="d-flex align-items-center gap-2">
-      <img src="../asset/img/logo.png" style="height:34px;" alt="logo">
-      <span id="mobileUserName" class="mobile-username">User</span>
-    </div>
-    <button id="navMenuBtn" class="btn text-white"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/></svg></button>
-  </div>
 
-  <div class="main">
-    <div class="form-wrap content-inner">
     <script>
-      (function(){
-        const name = localStorage.getItem('etrack_user_name') || 'User';
-        const elName = document.getElementById('sidebarUserName'); if(elName) elName.textContent = name;
-        const mobileEl = document.getElementById('mobileUserName'); if(mobileEl) mobileEl.textContent = name;
-      })();
-    </script>
-    <!-- Page header -->
-    <div class="page-header mt-3 mb-3">
-      <h2 class="h5 mb-1">Add Income</h2>
-      <div class="subtitle">Record a new income entry</div>
-    </div>
-    <div class="form-card">
-      <form id="incomeForm">
-        <div class="mb-3">
-          <label class="form-label small">Date</label>
-          <input type="date" class="form-control" name="date" required>
-        </div>
+      // PROTECT PAGE
+      const userId = localStorage.getItem("etrack_user_id");
+      if (!userId) {
+        window.location.href = "../index.html"; // Redirect ke login
+      }
 
-        <div class="mb-3">
-          <label class="form-label small">Type</label>
-          <select class="form-select" name="type">
-            <option>Cash</option>
-            <option>Card</option>
-            <option>Transfer</option>
-          </select>
-        </div>
+      function logout() {
+        localStorage.clear();
+        window.location.href = "../index.html";
+      }
 
-        <div class="mb-3">
-          <label class="form-label small">Amount</label>
-          <input type="number" step="0.01" class="form-control" name="amount" placeholder="800.000" required>
-        </div>
+      const API_BASE = "http://localhost:3000";
+      const form = document.getElementById("incomeForm");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+        const payload = {
+          user_id: Number(localStorage.getItem("etrack_user_id") || 1),
+          type: "income",
+          amount: Number(fd.get("amount")) || 0,
+          occurred_at: fd.get("date") || new Date().toISOString().slice(0, 10),
+          category: fd.get("category") || "Other",
+          description: fd.get("note") || null,
+          payment_type: fd.get("type") || null,
+        };
+        try {
+          const res = await fetch(API_BASE + "/transactions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) throw new Error("failed");
+          const json = await res.json();
+          alert("Income saved.");
+          window.location.href = "dashboard.html";
+        } catch (err) {
+          console.error(err);
+          alert("Failed to save income. See console for details.");
+        }
+      });
 
-        <div class="mb-3">
-          <label class="form-label small">Category</label>
-          <select class="form-select" name="category">
-            <option>Salary</option>
-            <option>Bonus</option>
-            <option>Other</option>
-          </select>
-        </div>
+      // Sidebar / mobile menu toggle (triggered from navbar menu button)
+      const sidebar = document.querySelector(".app-sidebar");
+      const navMenuBtn = document.getElementById("navMenuBtn");
+      const sidebarOverlay = document.getElementById("sidebarOverlay");
+      const mobileMenu = document.getElementById("mobileMenu");
+      const mobileMenuOverlay = document.getElementById("mobileMenuOverlay");
 
-        <div class="mb-3">
-          <label class="form-label small">Note</label>
-          <input type="text" class="form-control" name="note" placeholder="Part Time">
-        </div>
+      function openSidebar() {
+        sidebar && sidebar.classList.add("open");
+        sidebarOverlay && sidebarOverlay.classList.add("show");
+        sidebarOverlay && sidebarOverlay.setAttribute("aria-hidden", "false");
+      }
+      function closeSidebar() {
+        sidebar && sidebar.classList.remove("open");
+        sidebarOverlay && sidebarOverlay.classList.remove("show");
+        sidebarOverlay && sidebarOverlay.setAttribute("aria-hidden", "true");
+      }
 
-        <div class="d-flex justify-content-center mt-3">
-          <button type="submit" class="btn submit-btn">Submit</button>
-        </div>
-      </form>
-    </div>
-    </div>
-  </div>
-
-  <script>
-    const API_BASE = 'http://localhost:3000';
-    const form = document.getElementById('incomeForm');
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const fd = new FormData(form);
-      const payload = {
-        user_id: Number(localStorage.getItem('etrack_user_id') || 1),
-        type: 'income',
-        amount: Number(fd.get('amount')) || 0,
-        occurred_at: fd.get('date') || new Date().toISOString().slice(0,10),
-        category: fd.get('category') || 'Other',
-        description: fd.get('note') || null,
-        payment_type: fd.get('type') || null
-      };
-      try{
-        const res = await fetch(API_BASE + '/transactions', {
-          method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(payload)
+      navMenuBtn &&
+        navMenuBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (window.innerWidth <= 767) {
+            const isOpen = mobileMenu && mobileMenu.classList.contains("show");
+            if (isOpen) {
+              mobileMenu && mobileMenu.classList.remove("show");
+              mobileMenuOverlay && mobileMenuOverlay.classList.remove("show");
+              mobileMenu && mobileMenu.setAttribute("aria-hidden", "true");
+              mobileMenuOverlay &&
+                mobileMenuOverlay.setAttribute("aria-hidden", "true");
+            } else {
+              mobileMenu && mobileMenu.classList.add("show");
+              mobileMenuOverlay && mobileMenuOverlay.classList.add("show");
+              mobileMenu && mobileMenu.setAttribute("aria-hidden", "false");
+              mobileMenuOverlay &&
+                mobileMenuOverlay.setAttribute("aria-hidden", "false");
+            }
+            return;
+          }
+          openSidebar();
         });
-        if(!res.ok) throw new Error('failed');
-        const json = await res.json();
-        alert('Income saved.');
-        window.location.href = 'dashboard.html';
-      }catch(err){
-        console.error(err);
-        alert('Failed to save income. See console for details.');
-      }
-    });
 
-  // Sidebar / mobile menu toggle (triggered from navbar menu button)
-  const sidebar = document.querySelector('.app-sidebar');
-  const navMenuBtn = document.getElementById('navMenuBtn');
-  const sidebarOverlay = document.getElementById('sidebarOverlay');
-  const mobileMenu = document.getElementById('mobileMenu');
-  const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+      sidebarOverlay &&
+        sidebarOverlay.addEventListener("click", () => closeSidebar());
+      mobileMenuOverlay &&
+        mobileMenuOverlay.addEventListener("click", () => {
+          mobileMenu && mobileMenu.classList.remove("show");
+          mobileMenuOverlay && mobileMenuOverlay.classList.remove("show");
+          mobileMenu && mobileMenu.setAttribute("aria-hidden", "true");
+          mobileMenuOverlay &&
+            mobileMenuOverlay.setAttribute("aria-hidden", "true");
+        });
 
-  function openSidebar() { sidebar && sidebar.classList.add('open'); sidebarOverlay && sidebarOverlay.classList.add('show'); sidebarOverlay && sidebarOverlay.setAttribute('aria-hidden','false'); }
-  function closeSidebar() { sidebar && sidebar.classList.remove('open'); sidebarOverlay && sidebarOverlay.classList.remove('show'); sidebarOverlay && sidebarOverlay.setAttribute('aria-hidden','true'); }
+      document
+        .querySelectorAll(".app-sidebar .nav-link")
+        .forEach((a) => a.addEventListener("click", () => closeSidebar()));
+      document.querySelectorAll("#mobileMenu a").forEach((a) =>
+        a.addEventListener("click", () => {
+          mobileMenu && mobileMenu.classList.remove("show");
+          mobileMenuOverlay && mobileMenuOverlay.classList.remove("show");
+          mobileMenu && mobileMenu.setAttribute("aria-hidden", "true");
+          mobileMenuOverlay &&
+            mobileMenuOverlay.setAttribute("aria-hidden", "true");
+        })
+      );
 
-  navMenuBtn && navMenuBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (window.innerWidth <= 767) {
-      const isOpen = mobileMenu && mobileMenu.classList.contains('show');
-      if (isOpen) {
-        mobileMenu && mobileMenu.classList.remove('show');
-        mobileMenuOverlay && mobileMenuOverlay.classList.remove('show');
-        mobileMenu && mobileMenu.setAttribute('aria-hidden','true');
-        mobileMenuOverlay && mobileMenuOverlay.setAttribute('aria-hidden','true');
-      } else {
-        mobileMenu && mobileMenu.classList.add('show');
-        mobileMenuOverlay && mobileMenuOverlay.classList.add('show');
-        mobileMenu && mobileMenu.setAttribute('aria-hidden','false');
-        mobileMenuOverlay && mobileMenuOverlay.setAttribute('aria-hidden','false');
-      }
-      return;
-    }
-    openSidebar();
-  });
+      // Close on Escape key
+      document.addEventListener("keydown", (ev) => {
+        if (ev.key === "Escape") {
+          closeSidebar();
+          if (mobileMenu) {
+            mobileMenu.classList.remove("show");
+            mobileMenuOverlay && mobileMenuOverlay.classList.remove("show");
+            mobileMenu.setAttribute("aria-hidden", "true");
+            mobileMenuOverlay &&
+              mobileMenuOverlay.setAttribute("aria-hidden", "true");
+          }
+        }
+      });
 
-  sidebarOverlay && sidebarOverlay.addEventListener('click', () => closeSidebar());
-  mobileMenuOverlay && mobileMenuOverlay.addEventListener('click', () => {
-    mobileMenu && mobileMenu.classList.remove('show');
-    mobileMenuOverlay && mobileMenuOverlay.classList.remove('show');
-    mobileMenu && mobileMenu.setAttribute('aria-hidden','true');
-    mobileMenuOverlay && mobileMenuOverlay.setAttribute('aria-hidden','true');
-  });
-
-  document.querySelectorAll('.app-sidebar .nav-link').forEach(a => a.addEventListener('click', () => closeSidebar()));
-  document.querySelectorAll('#mobileMenu a').forEach(a => a.addEventListener('click', () => {
-    mobileMenu && mobileMenu.classList.remove('show');
-    mobileMenuOverlay && mobileMenuOverlay.classList.remove('show');
-    mobileMenu && mobileMenu.setAttribute('aria-hidden','true');
-    mobileMenuOverlay && mobileMenuOverlay.setAttribute('aria-hidden','true');
-  }));
-
-  // Close on Escape key
-  document.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Escape') {
-      closeSidebar();
-      if (mobileMenu) {
-        mobileMenu.classList.remove('show');
-        mobileMenuOverlay && mobileMenuOverlay.classList.remove('show');
-        mobileMenu.setAttribute('aria-hidden','true');
-        mobileMenuOverlay && mobileMenuOverlay.setAttribute('aria-hidden','true');
-      }
-    }
-  });
-
-  // Click outside to close mobile menu
-  document.addEventListener('click', (ev) => {
-    if (mobileMenu && mobileMenu.classList.contains('show')) {
-      const path = ev.composedPath ? ev.composedPath() : (ev.path || []);
-      if (!path.includes(mobileMenu) && !path.includes(navMenuBtn)) {
-        mobileMenu.classList.remove('show');
-        mobileMenuOverlay && mobileMenuOverlay.classList.remove('show');
-        mobileMenu.setAttribute('aria-hidden','true');
-        mobileMenuOverlay && mobileMenuOverlay.setAttribute('aria-hidden','true');
-      }
-    }
-  });
-  </script>
-</body>
+      // Click outside to close mobile menu
+      document.addEventListener("click", (ev) => {
+        if (mobileMenu && mobileMenu.classList.contains("show")) {
+          const path = ev.composedPath ? ev.composedPath() : ev.path || [];
+          if (!path.includes(mobileMenu) && !path.includes(navMenuBtn)) {
+            mobileMenu.classList.remove("show");
+            mobileMenuOverlay && mobileMenuOverlay.classList.remove("show");
+            mobileMenu.setAttribute("aria-hidden", "true");
+            mobileMenuOverlay &&
+              mobileMenuOverlay.setAttribute("aria-hidden", "true");
+          }
+        }
+      });
+    </script>
+  </body>
 </html>
