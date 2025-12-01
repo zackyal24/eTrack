@@ -1,125 +1,164 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>eTrack — Login</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background: #ffffff;
-      font-family: 'Inter', sans-serif;
-    }
-
-    .login-wrapper {
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .login-card {
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
-    }
-
-    .login-input {
-      border-radius: 12px;
-      padding: 12px;
-      border: 1.5px solid #0d6efd;
-    }
-
-    .login-btn {
-      border-radius: 20px;
-      padding: 10px 0;
-      background: #0056d2;
-      font-weight: 600;
-    }
-
-    .google-btn {
-      border-radius: 20px;
-      background: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      padding: 10px 0;
-      font-weight: 500;
-    }
-
-    @media (min-width: 992px) {
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>eTrack — Login</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
       body {
-        background: linear-gradient(180deg, #f3f7ff, #ffffff);
+        background: #ffffff;
+        font-family: "Inter", sans-serif;
       }
-    }
-  </style>
-</head>
-<body>
 
-  <div class="login-wrapper">
-    <div class="login-card">
+      .login-wrapper {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
 
-      <!-- Logo -->
-      <img src="asset/img/logo.png" alt="eTrack Logo" style="width:130px;" class="mb-3">
+      .login-card {
+        width: 100%;
+        max-width: 420px;
+        text-align: center;
+      }
 
-      <h5 class="mb-4">Hai, Selamat datang!</h5>
+      .login-input {
+        border-radius: 12px;
+        padding: 12px;
+        border: 1.5px solid #0d6efd;
+      }
 
-      <!-- Input fields -->
-      <input id="loginEmail" type="email" placeholder="Email" class="form-control login-input mb-3">
-      <input id="loginPassword" type="password" placeholder="Password" class="form-control login-input mb-2">
+      .login-btn {
+        border-radius: 20px;
+        padding: 10px 0;
+        background: #0056d2;
+        font-weight: 600;
+      }
 
-      <div class="text-end mb-3 small">
-        <a href="#" class="text-primary">lupa kata sandi?</a>
+      .google-btn {
+        border-radius: 20px;
+        background: #fff;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        padding: 10px 0;
+        font-weight: 500;
+      }
+
+      @media (min-width: 992px) {
+        body {
+          background: linear-gradient(180deg, #f3f7ff, #ffffff);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-wrapper">
+      <div class="login-card">
+        <!-- Logo -->
+        <img
+          src="asset/img/logo.png"
+          alt="eTrack Logo"
+          style="width: 130px"
+          class="mb-3"
+        />
+
+        <h5 class="mb-4">Hai, Selamat datang!</h5>
+
+        <!-- Input fields -->
+        <input
+          id="loginEmail"
+          type="email"
+          placeholder="Email"
+          class="form-control login-input mb-3"
+        />
+        <input
+          id="loginPassword"
+          type="password"
+          placeholder="Password"
+          class="form-control login-input mb-2"
+        />
+
+        <div class="text-end mb-3 small">
+          <a href="#" class="text-primary">lupa kata sandi?</a>
+        </div>
+
+        <!-- Login button -->
+        <button id="loginBtn" class="btn btn-primary w-100 login-btn mb-3">
+          Masuk
+        </button>
+
+        <!-- Divider -->
+        <div class="d-flex align-items-center my-3">
+          <div class="flex-grow-1" style="height: 1px; background: #ccc"></div>
+          <div class="px-2 small text-muted">Masuk dengan</div>
+          <div class="flex-grow-1" style="height: 1px; background: #ccc"></div>
+        </div>
+
+        <!-- Google login button -->
+        <button
+          class="btn w-100 google-btn d-flex justify-content-center align-items-center mb-3"
+        >
+          <img
+            src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
+            style="width: 22px; margin-right: 10px"
+          />
+          Google
+        </button>
+
+        <!-- Register link -->
+        <div class="small mt-3">
+          Belum punya akun?
+          <a href="service/register.html" class="text-primary">Daftar.</a>
+        </div>
       </div>
-
-      <!-- Login button -->
-      <button id="loginBtn" class="btn btn-primary w-100 login-btn mb-3">Masuk</button>
-
-      <!-- Divider -->
-      <div class="d-flex align-items-center my-3">
-        <div class="flex-grow-1" style="height:1px; background:#ccc;"></div>
-        <div class="px-2 small text-muted">Masuk dengan</div>
-        <div class="flex-grow-1" style="height:1px; background:#ccc;"></div>
-      </div>
-
-      <!-- Google login button -->
-      <button class="btn w-100 google-btn d-flex justify-content-center align-items-center mb-3">
-        <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" style="width:22px; margin-right:10px;"> Google
-      </button>
-
-      <!-- Register link -->
-      <div class="small mt-3">
-        Belum punya akun? <a href="service/register.html" class="text-primary">Daftar.</a>
-      </div>
-
     </div>
-  </div>
 
     <script>
-      const API_BASE = 'http://localhost:3000';
-      const loginBtn = document.getElementById('loginBtn');
-      loginBtn && loginBtn.addEventListener('click', async (ev) => {
+      const API_BASE = "http://localhost:3000";
+      const loginBtn = document.getElementById("loginBtn");
+
+      loginBtn?.addEventListener("click", async (ev) => {
         ev.preventDefault();
-        const email = document.getElementById('loginEmail').value.trim();
-        const password = document.getElementById('loginPassword').value;
-        if(!email || !password){ alert('Masukkan email dan password'); return; }
-        try{
-          const res = await fetch(API_BASE + '/auth/login', {
-            method: 'POST', headers: { 'Content-Type':'application/json' },
-            body: JSON.stringify({ email, password })
+
+        const email = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value;
+
+        if (!email || !password) {
+          alert("Masukkan email dan password");
+          return;
+        }
+
+        try {
+          const res = await fetch(API_BASE + "/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
           });
-          if(!res.ok){ const j = await res.json().catch(()=>({})); throw new Error(j.error || 'login failed'); }
-          const user = await res.json();
-          // store minimal session
-          localStorage.setItem('etrack_user_id', String(user.id));
-          localStorage.setItem('etrack_user_email', user.email || '');
-          if(user.name) localStorage.setItem('etrack_user_name', user.name);
-          window.location.href = 'service/dashboard.html';
-        }catch(err){
-          console.error('login error', err);
-          alert('Login gagal: ' + (err.message || 'error'));
+
+          const data = await res.json(); // Ambil JSON dulu
+
+          if (!res.ok) {
+            alert(data.message || "Email atau password salah");
+            return;
+          }
+
+          // Simpan token & user info
+          localStorage.setItem("etrack_token", data.token);
+          localStorage.setItem("etrack_user_id", data.userId);
+          localStorage.setItem("etrack_user_email", data.email);
+          localStorage.setItem("etrack_user_name", data.name);
+
+          window.location.href = "service/dashboard.html";
+        } catch (err) {
+          console.error("login error", err);
+          alert("Login gagal: " + (err.message || "error"));
         }
       });
     </script>
-
-</body>
+  </body>
 </html>
