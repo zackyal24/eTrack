@@ -35,7 +35,9 @@
         <a href="dashboard.html" class="nav-link">Dashboard</a>
         <a href="report.html" class="nav-link">Report</a>
         <a href="goals.html" class="nav-link">Goals</a>
-        <a href="../index.html" class="nav-link logout">Log out</a>
+        <a href="../index.html" class="nav-link logout text-danger fw-semi-bold" onclick="logout()">
+          Log out
+        </a>
       </nav>
     </aside>
 
@@ -49,9 +51,11 @@
     ></div>
     <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
       <a href="dashboard.html">Dashboard</a>
-      <a href="#">Report</a>
-      <a href="#">Goals</a>
-      <a href="#" class="logout">Log out</a>
+      <a href="report.html">Report</a>
+      <a href="goals.html">Goals</a>
+      <a href="../index.html" class="nav-link logout text-danger fw-semi-bold" onclick="logout()">
+          Log out
+        </a>
     </div>
 
     <!-- Top Navigation -->
@@ -130,10 +134,91 @@
           </div>
         </div>
 
+        
+
         <!-- Transactions (populated from backend) -->
         <div id="transactionsList" class="mt-2"></div>
       </div>
     </div>
+
+    <!-- Transaction Detail Modal -->
+      <div class="modal fade" id="transactionModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Detail Transaksi</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+
+            <div class="modal-body">
+              <p>
+                <strong>Kategori:</strong> <span id="detailCategory"></span>
+              </p>
+              <p><strong>Jenis:</strong> <span id="detailType"></span></p>
+              <p><strong>Jumlah:</strong> <span id="detailAmount"></span></p>
+              <p><strong>Tanggal:</strong> <span id="detailDate"></span></p>
+              <p><strong>Catatan:</strong> <span id="detailNote"></span></p>
+            </div>
+
+            <div class="modal-footer">
+              <button id="editButton" class="btn btn-warning">Edit</button>
+              <button id="deleteButton" class="btn btn-danger">Delete</button>
+              <button class="btn btn-secondary" data-bs-dismiss="modal">
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Transaction Modal -->
+<div class="modal fade" id="editTransactionModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Transaksi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editTransactionForm">
+          <div class="mb-2">
+            <label class="form-label">Kategori</label>
+            <input type="text" id="editCategory" class="form-control" required />
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Jenis</label>
+            <select id="editType" class="form-select">
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Jumlah</label>
+            <input type="number" id="editAmount" class="form-control" required />
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Tanggal</label>
+            <input type="date" id="editDate" class="form-control" required />
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Catatan</label>
+            <textarea id="editNote" class="form-control"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button id="saveEditButton" class="btn btn-primary">Simpan</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
     <!-- Floating Add Button -->
     <!-- Floating Add Button (single, with menu) -->
@@ -164,9 +249,25 @@
       >
         +
       </button>
-    </div>
 
     <script>
+      const API_BASE = "http://localhost:3000";
+      const userId = Number(localStorage.getItem("etrack_user_id") || 1);
+
+      if (!userId) {
+        window.location.href = "../index.html"; // Redirect ke login
+      }
+
+      // GLOBAL FUNCTION
+      function formatCurrency(v) {
+        return new Intl.NumberFormat("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }).format(v);
+      }
+
+      // FAB MENU
       const fabBtn = document.getElementById("fabBtn");
       const fabMenu = document.getElementById("fabMenu");
 
@@ -192,37 +293,26 @@
         toggleFabMenu();
       });
 
-      // close when clicking outside
       document.addEventListener("click", (e) => {
-        if (!fabMenu.contains(e.target) && e.target !== fabBtn) {
-          closeFabMenu();
-        }
+        if (!fabMenu.contains(e.target) && e.target !== fabBtn) closeFabMenu();
       });
 
-      // close with Escape
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") closeFabMenu();
-      });
-
-      // stop clicks inside menu from closing when interacting with buttons
       fabMenu.addEventListener("click", (e) => {
         e.stopPropagation();
         const btn = e.target.closest("button");
         if (!btn) return;
         if (btn.id === "fabIncome") {
-          // navigate to income page
           window.location.href = "income.html";
           return;
         }
         if (btn.id === "fabExpense") {
-          // navigate to expense page
           window.location.href = "expense.html";
           return;
         }
         closeFabMenu();
       });
 
-      // Sidebar toggle for mobile
+      // SIDEBAR MOBILE
       const sidebar = document.querySelector(".app-sidebar");
       const navMenuBtn = document.getElementById("navMenuBtn");
       const sidebarOverlay = document.getElementById("sidebarOverlay");
@@ -243,7 +333,6 @@
       navMenuBtn &&
         navMenuBtn.addEventListener("click", (e) => {
           e.stopPropagation();
-          // on small screens show small mobile menu instead of full sidebar
           if (window.innerWidth <= 767) {
             const isOpen = mobileMenu.classList.contains("show");
             if (isOpen) {
@@ -262,9 +351,8 @@
           openSidebar();
         });
 
-      sidebarOverlay &&
-        sidebarOverlay.addEventListener("click", () => closeSidebar());
-      // mobile small menu overlay close
+      sidebarOverlay && sidebarOverlay.addEventListener("click", closeSidebar);
+
       mobileMenuOverlay &&
         mobileMenuOverlay.addEventListener("click", () => {
           mobileMenu.classList.remove("show");
@@ -273,7 +361,6 @@
           mobileMenuOverlay.setAttribute("aria-hidden", "true");
         });
 
-      // close mobile menu when selecting one of its links
       document.querySelectorAll("#mobileMenu a").forEach((a) => {
         a.addEventListener("click", () => {
           mobileMenu.classList.remove("show");
@@ -283,163 +370,278 @@
         });
       });
 
-      // close sidebar when a nav link is clicked (mobile)
       document.querySelectorAll(".app-sidebar .nav-link").forEach((a) => {
         a.addEventListener("click", () => closeSidebar());
       });
-    </script>
-    <script>
-      // Fetch recent transactions and monthly summary from backend and render
-      (function () {
-        const API_BASE = "http://localhost:3000";
-        const userId = Number(localStorage.getItem("etrack_user_id") || 1);
 
-        function formatCurrency(v) {
-          try {
-            return new Intl.NumberFormat("id-ID", {
-              style: "currency",
-              currency: "IDR",
-              maximumFractionDigits: 0,
-            }).format(v);
-          } catch (e) {
-            return "Rp " + v;
-          }
-        }
+      function logout() {
+        localStorage.clear();
+        window.location.href = "../index.html";
+      }
 
-        // selectedMonth: Date pointing to first day of selected month
-        let selectedMonth = new Date();
-        selectedMonth.setDate(1);
+      // TRANSACTIONS
+      let selectedMonth = new Date();
+      selectedMonth.setDate(1);
 
-        const monthLabel = document.getElementById("monthLabel");
-        const prevBtn = document.getElementById("prevMonth");
-        const nextBtn = document.getElementById("nextMonth");
+      const monthLabel = document.getElementById("monthLabel");
+      const prevBtn = document.getElementById("prevMonth");
+      const nextBtn = document.getElementById("nextMonth");
 
-        function toYMD(d) {
-          return d.toISOString().slice(0, 10);
-        }
-        function startOfMonth(d) {
-          const y = d.getFullYear(),
-            m = d.getMonth();
-          return new Date(y, m, 1);
-        }
-        function endOfMonth(d) {
-          const y = d.getFullYear(),
-            m = d.getMonth();
-          return new Date(y, m + 1, 0);
-        }
-        function formatMonthLabel(d) {
-          return d.toLocaleString("id-ID", { month: "long", year: "numeric" });
-        }
+      function toYMD(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const da = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${da}`;
+      }
 
-        async function loadForMonth() {
-          if (monthLabel)
-            monthLabel.textContent = formatMonthLabel(selectedMonth);
-          const start = toYMD(startOfMonth(selectedMonth));
-          const end = toYMD(endOfMonth(selectedMonth));
+      function startOfMonth(d) {
+        return new Date(d.getFullYear(), d.getMonth(), 1);
+      }
 
-          // get summary for selected month
-          try {
-            const sres = await fetch(
-              `${API_BASE}/reports/summary?start=${start}&end=${end}&user_id=${userId}`
-            );
-            if (sres.ok) {
-              const sjson = await sres.json();
-              let income = 0,
-                expense = 0;
-              sjson.forEach((r) => {
-                // note: r.type may be backticked or different; normalize
-                const t = (r.type || "").toString().toLowerCase();
-                if (t === "income") income += Number(r.total || 0);
-                if (t === "expense") expense += Number(r.total || 0);
-              });
-              const balance = income - expense;
-              const incEl = document.getElementById("incomeValue");
-              if (incEl) incEl.textContent = formatCurrency(income);
-              const expEl = document.getElementById("expensesValue");
-              if (expEl) expEl.textContent = formatCurrency(expense);
-              const balEl = document.getElementById("balanceValue");
-              if (balEl) balEl.textContent = formatCurrency(balance);
-            }
-          } catch (err) {
-            console.error("summary fetch error", err);
-          }
+      function endOfMonth(d) {
+        return new Date(d.getFullYear(), d.getMonth() + 1, 0);
+      }
 
-          // fetch recent transactions for the selected month
-          try {
-            const tres = await fetch(
-              `${API_BASE}/transactions?user_id=${userId}&start=${start}&end=${end}&limit=500`
-            );
-            if (!tres.ok) throw new Error("fail");
-            const tx = await tres.json();
-            const list = document.getElementById("transactionsList");
-            if (!list) return;
-            list.innerHTML = "";
+      function formatDateDetail(dtString) {
+  if (!dtString) return "-";
 
-            // group by date (YYYY-MM-DD)
-            let lastDate = null;
-            tx.forEach((t) => {
-              const d = t.occurred_at ? t.occurred_at.split("T")[0] : "";
-              if (d !== lastDate) {
-                const dateHeader = document.createElement("div");
-                dateHeader.className = "px-3 mt-3 small text-muted";
-                const dateObj = new Date(d + "T00:00:00");
-                dateHeader.textContent = isNaN(dateObj.getTime())
-                  ? d
-                  : dateObj.toLocaleDateString("id-ID", {
-                      weekday: "short",
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                    });
-                list.appendChild(dateHeader);
-                lastDate = d;
-              }
+  const dt = new Date(dtString);
 
-              const card = document.createElement("div");
-              card.className = "tx-card d-flex align-items-center gap-3";
-              const icon = document.createElement("div");
-              icon.className = "tx-icon";
-              icon.textContent = "💸";
-              const title = document.createElement("div");
-              title.className = "flex-grow-1";
-              title.innerHTML = `<div class="fw-bold">${
-                t.category || "Uncategorized"
-              }</div><div class="small text-muted">${
-                t.description || ""
-              }</div>`;
-              const amt = document.createElement("div");
-              amt.className =
-                t.type === "income"
-                  ? "text-success fw-semibold"
-                  : "text-danger fw-semibold";
-              amt.textContent =
-                (t.type === "income" ? "+ " : "- ") +
-                formatCurrency(Number(t.amount || 0));
-              card.appendChild(icon);
-              card.appendChild(title);
-              card.appendChild(amt);
-              list.appendChild(card);
+  const options = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+
+  return new Intl.DateTimeFormat('id-ID', options).format(dt);
+}
+
+      let currentTxId = null;
+
+      function openTransactionModal(tx) {
+  currentTxId = tx.id;
+
+  document.getElementById("detailCategory").textContent = tx.category || "-";
+  document.getElementById("detailType").textContent = tx.type || "-";
+  document.getElementById("detailAmount").textContent = formatCurrency(tx.amount || 0);
+
+  // ⬇️ Pakai format baru di sini
+  document.getElementById("detailDate").textContent = formatDateDetail(tx.occurred_at);
+
+  document.getElementById("detailNote").textContent = tx.description || "-";
+
+  const modalEl = document.getElementById("transactionModal");
+  const modal = new bootstrap.Modal(modalEl);
+  modal.show();
+}
+
+      async function loadForMonth() {
+        const start = toYMD(startOfMonth(selectedMonth));
+        const end = toYMD(endOfMonth(selectedMonth));
+
+        monthLabel.textContent = selectedMonth.toLocaleString("id-ID", {
+          month: "long",
+          year: "numeric",
+        });
+
+        // Fetch Summary
+        try {
+          const sres = await fetch(
+            `${API_BASE}/reports/summary?start=${start}&end=${end}&user_id=${userId}`
+          );
+          if (sres.ok) {
+            const data = await sres.json();
+            let income = 0,
+              expense = 0;
+            data.forEach((r) => {
+              const t = r.type?.toLowerCase();
+              if (t === "income") income += r.total || 0;
+              if (t === "expense") expense += r.total || 0;
             });
-          } catch (err) {
-            console.error("transactions fetch error", err);
+
+            document.getElementById("incomeValue").textContent =
+              formatCurrency(income);
+            document.getElementById("expensesValue").textContent =
+              formatCurrency(expense);
+            document.getElementById("balanceValue").textContent =
+              formatCurrency(income - expense);
           }
+        } catch (err) {
+          console.error("summary fetch error", err);
         }
 
-        // wire month buttons
-        if (prevBtn)
-          prevBtn.addEventListener("click", () => {
-            selectedMonth.setMonth(selectedMonth.getMonth() - 1);
-            loadForMonth();
+        // Fetch Transactions
+        try {
+          const tres = await fetch(
+            `${API_BASE}/transactions?user_id=${userId}&start=${start}&end=${end}&limit=500`
+          );
+          if (!tres.ok) throw new Error("fail");
+          const tx = await tres.json();
+          const list = document.getElementById("transactionsList");
+          list.innerHTML = "";
+
+          let lastDate = null;
+          tx.forEach((t) => {
+            const d = t.occurred_at;
+            if (!d) return;
+
+            if (d !== lastDate) {
+              const dateObj = new Date(d);
+              const dateHeader = document.createElement("div");
+              dateHeader.className = "px-3 mt-3 small text-muted";
+              dateHeader.textContent = dateObj.toLocaleDateString("id-ID", {
+                weekday: "short",
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              });
+              list.appendChild(dateHeader);
+              lastDate = d;
+            }
+
+            const card = document.createElement("div");
+            card.className = "tx-card d-flex align-items-center gap-3";
+            card.dataset.txId = t.id;
+
+            card.addEventListener("click", (e) => {
+              e.stopPropagation();
+              openTransactionModal(t);
+            });
+
+            card.innerHTML = `
+          <div class="tx-icon">💸</div>
+          <div class="flex-grow-1">
+            <div class="fw-bold">${t.category || "Uncategorized"}</div>
+            <div class="small text-muted">${t.description || ""}</div>
+          </div>
+          <div class="${
+            t.type === "income" ? "text-success" : "text-danger"
+          } fw-semibold">
+            ${
+              (t.type === "income" ? "+ " : "- ") +
+              formatCurrency(t.amount || 0)
+            }
+          </div>
+        `;
+            list.appendChild(card);
           });
-        if (nextBtn)
-          nextBtn.addEventListener("click", () => {
-            selectedMonth.setMonth(selectedMonth.getMonth() + 1);
-            loadForMonth();
+        } catch (err) {
+          console.error("transactions fetch error", err);
+        }
+      }
+
+      prevBtn.addEventListener("click", () => {
+        selectedMonth.setMonth(selectedMonth.getMonth() - 1);
+        loadForMonth();
+      });
+
+      nextBtn.addEventListener("click", () => {
+        selectedMonth.setMonth(selectedMonth.getMonth() + 1);
+        loadForMonth();
+      });
+
+      // DELETE handler
+      document
+        .getElementById("deleteButton")
+        .addEventListener("click", async () => {
+          if (!currentTxId || !confirm("Hapus transaksi ini?")) return;
+
+          const res = await fetch(`${API_BASE}/transactions/${currentTxId}`, {
+            method: "DELETE",
           });
 
-        // initial load
+          if (res.ok) {
+            alert("Transaksi berhasil dihapus");
+            loadForMonth();
+            bootstrap.Modal.getInstance(
+              document.getElementById("transactionModal")
+            ).hide();
+          } else {
+            alert("Gagal menghapus transaksi");
+          }
+        });
+
+      // EDIT handler
+      let editModal, currentEditTx = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+  editModal = new bootstrap.Modal(document.getElementById("editTransactionModal"));
+
+  // Tombol Edit di modal detail
+  document.getElementById("editButton").addEventListener("click", () => {
+    if (!currentTxId) return;
+
+    currentEditTx = Number(currentTxId);
+    if (isNaN(currentEditTx)) {
+      alert("ID transaksi tidak valid!");
+      return;
+    }
+
+    // ambil data dari modal detail
+    const category = document.getElementById("detailCategory").textContent;
+    const type = document.getElementById("detailType").textContent.toLowerCase();
+    const amountText = document.getElementById("detailAmount").textContent.replace(/[^\d]/g, "");
+    const amount = Number(amountText) || 0;
+    const date = document.getElementById("detailDate").textContent;
+    const note = document.getElementById("detailNote").textContent;
+
+    // isi form edit
+    document.getElementById("editCategory").value = category !== "-" ? category : "";
+    document.getElementById("editType").value = type === "income" ? "income" : "expense";
+    document.getElementById("editAmount").value = amount;
+    document.getElementById("editDate").value = date;
+    document.getElementById("editNote").value = note !== "-" ? note : "";
+
+    // tutup modal detail dan buka modal edit
+    bootstrap.Modal.getInstance(document.getElementById("transactionModal")).hide();
+    editModal.show();
+  });
+
+  // Tombol simpan edit
+  document.getElementById("saveEditButton").addEventListener("click", async () => {
+    if (!currentEditTx) return;
+
+    const updatedTx = {
+      category: document.getElementById("editCategory").value.trim(),
+      type: document.getElementById("editType").value,
+      amount: Number(document.getElementById("editAmount").value),
+      occurred_at: document.getElementById("editDate").value,
+      description: document.getElementById("editNote").value.trim(),
+      user_id: Number(localStorage.getItem("etrack_user_id")) || 1
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/transactions/${currentEditTx}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedTx),
+      });
+
+      if (res.ok) {
+        alert("Transaksi berhasil diperbarui");
+        editModal.hide();
+        loadForMonth(); // refresh list
+      } else if (res.status === 404) {
+        alert("Transaksi tidak ditemukan di server!");
+      } else {
+        alert("Gagal memperbarui transaksi");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Terjadi error saat update transaksi");
+    }
+  });
+});
+
+      // INITIAL LOAD
+      document.addEventListener("DOMContentLoaded", () => {
         loadForMonth();
-      })();
+      });
     </script>
+    <!-- Bootstrap JS (bundle sudah include Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
